@@ -4,6 +4,8 @@
 (defvar *title* "A Blog")
 (defvar *id* 0)
 (defvar *maxchar* 140)
+(defvar *user* "admin")
+(defvar *password* "admin")
 
 (defclass post ()
   ((title
@@ -42,11 +44,11 @@
 	  (:a :href
 	      (conc "view?id="
 		    (write-to-string (id post)))
-	      (:div :class "post-title" (str (title post))))
+	      (:span :class "post-title" (str (title post))))
 	  (:div :class "post-date" (str (date post)))
 	  (:div :class "post-body"
 		(let ((b (body post)))
-		  (str (handler-case
+		  (esc (handler-case
 			   (subseq b 0 maxchar)
 			 (error () b))))))))
 
