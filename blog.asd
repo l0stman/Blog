@@ -10,4 +10,4 @@
 		 (:file "macros" :depends-on ("packages"))
 		 (:file "blog" :depends-on ("packages" "macros"))
 		 (:file "new" :depends-on ("packages" "macros")))
-    :depends-on (:hunchentoot :cl-who))
+    :depends-on (:hunchentoot :cl-who :md5))

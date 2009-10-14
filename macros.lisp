@@ -9,8 +9,9 @@
      ,@body))
 
 (defmacro with-auth (&rest body)
-  `(multiple-value-bind (user password) (authorization)
-			(cond ((and (string= user *user*)
-				    (string= password *password*))
-			       ,@body)
-			      (t (require-authorization *title*)))))
+  `(multiple-value-bind
+	 (user pass) (authorization)
+     (cond ((and (string= user *user*)
+		 (equalp (hash pass) *hash*))
+	    ,@body)
+	   (t (require-authorization *title*)))))

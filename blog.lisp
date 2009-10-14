@@ -4,8 +4,18 @@
 (defvar *title* "A Blog")
 (defvar *id* 0)
 (defvar *maxchar* 140)
+
+(defun salt ()
+  (with-output-to-string (s)
+    (loop repeat 5
+       do (princ (code-char (random 128)) s))))
+
+(defun hash (pass)
+  (md5sum-sequence (concatenate 'string *salt* pass)))
+
+(defvar *salt* (salt))
 (defvar *user* "admin")
-(defvar *password* "admin")
+(defvar *hash* (hash "admin"))
 
 (defclass post ()
   ((title
@@ -38,7 +48,7 @@
   (push (make-instance 'post :title title :body body :id *id*)
 	*blog*))
 
-(defun excerpt (post &optional maxchar)
+(defun excerpt (post &optional limitp)
   (with-html-str
     (:div :class "post"
 	  (:a :href
@@ -48,9 +58,11 @@
 	  (:div :class "post-date" (str (date post)))
 	  (:div :class "post-body"
 		(let ((b (body post)))
-		  (esc (handler-case
-			   (subseq b 0 maxchar)
-			 (error () b))))))))
+		  (esc (if limitp
+			   (handler-case
+			       (conc (subseq b 0 *maxchar*) "...")
+			     (error () b))
+			   b)))))))
 
 (defun blog ()
   (with-html
@@ -58,7 +70,7 @@
      (:head (:title (str *title*)))
      (:body
       (loop for p in *blog*
-	 do (str (excerpt p *maxchar*)))))))
+	 do (str (excerpt p 4)))))))
 
 (push (create-prefix-dispatcher "/blog" 'blog)
       *dispatch-table*)
