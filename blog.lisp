@@ -10,23 +10,26 @@
     (loop repeat 5
        do (princ (code-char (random 128)) s))))
 
+(defvar *salt* (salt))
+
 (defun hash (pass)
   (md5sum-sequence (concatenate 'string *salt* pass)))
 
-(defvar *salt* (salt))
 (defvar *user* "admin")
 (defvar *hash* (hash "admin"))
 
 (defclass post ()
   ((title
     :initarg :title
-    :reader title)
+    :reader title
+    :writer (setf title))
    (body
     :initarg :body
-    :reader body)
+    :reader body
+    :writer (setf body))
    (id
-    :initarg :id
-    :reader id)
+    :reader id
+    :initform (incf *id*))
    (date
     :reader date
     :initform (sys-time))))
@@ -44,11 +47,10 @@
 	      second)))
 
 (defun ins-post (title body)
-  (incf *id*)
-  (push (make-instance 'post :title title :body body :id *id*)
+  (push (make-instance 'post :title title :body body)
 	*blog*))
 
-(defun excerpt (post &optional limitp)
+(defun excerpt (post &key limitp)
   (with-html-str
     (:div :class "post"
 	  (:a :href
@@ -62,7 +64,11 @@
 			   (handler-case
 			       (conc (subseq b 0 *maxchar*) "...")
 			     (error () b))
-			   b)))))))
+			   b))))
+	  (:div :class "post-edit"
+		(:form :method "post" :action "new"
+		       (:input :type "hidden" :name "id" :value (id post))
+		       (:input :type "submit" :value "edit post"))))))
 
 (defun blog ()
   (with-html
@@ -70,7 +76,7 @@
      (:head (:title (str *title*)))
      (:body
       (loop for p in *blog*
-	 do (str (excerpt p 4)))))))
+	 do (str (excerpt p :limitp t)))))))
 
 (push (create-prefix-dispatcher "/blog" 'blog)
       *dispatch-table*)
@@ -80,13 +86,15 @@
 	       (= (id p) id))
 	   *blog*))
 
+(defun blog-error ()
+  (setf (return-code*) +http-not-found+)
+  nil)
+
 (define-easy-handler (view-post :uri "/view"
 				:default-request-type :get)
     ((id :parameter-type 'integer))
   (let ((p (find-post id)))
-    (cond ((not p)
-	   (setf (return-code*) +http-not-found+)
-	   nil)
+    (cond ((not p) (blog-error))
 	  (t (with-html
 	       (:html
 		(:head (:title (str (title p))))
