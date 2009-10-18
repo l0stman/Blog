@@ -28,8 +28,7 @@
 			    (:td "body")
 			    (:td (:textarea :name "body"
 					    :rows 10
-					    :cols 50
-					    (str body))))
+					    :cols 50 (str body))))
 			   (:tr
 			    (:td)
 			    (:td

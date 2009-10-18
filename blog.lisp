@@ -4,11 +4,16 @@
 (defvar *title* "A Blog")
 (defvar *id* 0)
 (defvar *maxchar* 140)
+(defvar *maxpost* 10)
 
 (defun salt ()
-  (with-output-to-string (s)
-    (loop repeat 5
-       do (princ (code-char (random 128)) s))))
+  (let* ((size 5)
+	 (s (make-array size
+			:fill-pointer 0
+			:element-type 'character)))
+    (loop repeat size
+       do (vector-push (code-char (random 128)) s)
+       finally (return s))))
 
 (defvar *salt* (salt))
 
@@ -28,9 +33,11 @@
     :reader body
     :writer (setf body))
    (id
+    :initarg :id
     :reader id
     :initform (incf *id*))
    (date
+    :initarg :date
     :reader date
     :initform (sys-time))))
 
@@ -69,17 +76,36 @@
 		(:form :method "post" :action "new"
 		       (:input :type "hidden" :name "id" :value (id post))
 		       (:input :type "submit" :value "edit post"))))))
+(defun header ()
+  (with-html-str
+    (:div :id "header"
+	  (:span (:a :href "new" "new"))
+	  (:span :class "separator" "|")
+	  (:span (:ad :href "admin" "admin")))
+    (:div :id "title" (:a :href "blog"(str *title*)))))
 
-(defun blog ()
-  (with-html
-    (:html
-     (:head (:title (str *title*)))
-     (:body
-      (loop for p in *blog*
-	 do (str (excerpt p :limitp t)))))))
-
-(push (create-prefix-dispatcher "/blog" 'blog)
-      *dispatch-table*)
+(define-easy-handler (blog :uri "/blog"
+			   :default-request-type :get)
+    ((page :parameter-type 'integer))
+  (let* ((page (or page 1))
+	 (blog (loop repeat (1+ (* (1- page) *maxpost*))
+		  for b on *blog*
+		  finally (return b))))
+    (with-html
+      (:html
+       (:head (:title (str *title*)))
+       (:body
+	(str (header))
+	(loop repeat *maxpost*
+	   for post in blog
+	   for rest on blog
+	   do (str (excerpt post :limitp t))
+	   finally (when (and rest (cdr rest))
+		     (htm
+		      (:a :href
+			  (conc "blog?page="
+				(write-to-string (1+ page)))
+			  "Next >>")))))))))
 
 (defun find-post (id)
   (find-if #'(lambda (p)
@@ -98,4 +124,5 @@
 	  (t (with-html
 	       (:html
 		(:head (:title (str (title p))))
-		(:body (str (excerpt p)))))))))
+		(:body (str (header))
+		       (str (excerpt p)))))))))
