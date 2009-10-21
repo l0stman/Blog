@@ -23,17 +23,15 @@
     (with-standard-io-syntax
       (let ((*package* (find-package :blog)))
 	(let ((*print-readably* nil))
-	  (format out "(~{~s ~s~^ ~})"
+	  (format out "#.(progn ~{(setq ~s ~s)~^ ~})"
 		  (loop for sym in *params*
-		       append `(',sym ,(symbol-value sym)))))
+		     append `(,sym ,(symbol-value sym)))))
 	(let ((*print-readably* t))
 	  (print *blog* out))))))
 
 (defun load-blog ()
   (with-open-file (in *db*)
     (with-standard-io-syntax
-      (let* ((*package* (find-package :blog))
-	    (conf (read in)))
-	(loop for sym in *params*
-	     do (setq sym (getf conf sym)))
+      (let* ((*package* (find-package :blog)))
+	(read in)
 	(setq *blog* (read in))))))
