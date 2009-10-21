@@ -16,11 +16,6 @@
 (defparameter *params*
   '(*title* *id* *maxchar* *maxpost* *user* *salt* *hash*))
 
-(defmacro save-conf (stream)
-  `(format ,stream "(~@{~s ~s ~})"
-	   ,@(loop for s in *params*
-		append `(',s ,s))))
-
 (defun save-blog ()
   (with-open-file (out (ensure-directories-exist *db*)
 		       :direction :output
@@ -28,7 +23,9 @@
     (with-standard-io-syntax
       (let ((*package* (find-package :blog)))
 	(let ((*print-readably* nil))
-	  (save-conf out))
+	  (format out "(~{~s ~s~^ ~})"
+		  (loop for sym in *params*
+		       append `(',sym ,(symbol-value sym)))))
 	(let ((*print-readably* t))
 	  (print *blog* out))))))
 

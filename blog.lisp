@@ -81,7 +81,7 @@
     (:div :id "header"
 	  (:span (:a :href "new" "new"))
 	  (:span :class "separator" "|")
-	  (:span (:ad :href "admin" "admin")))
+	  (:span (:a :href "admin" "admin")))
     (:div :id "title" (:a :href "blog"(str *title*)))))
 
 (define-easy-handler (blog :uri "/blog"
