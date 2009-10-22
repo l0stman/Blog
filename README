@@ -1,0 +1,4 @@
+This is a simple blog engine on top of Hunchentoot.  The blog is saved
+directly to disk using plain file.
+
+The default username and password is admin.
