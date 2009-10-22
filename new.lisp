@@ -50,4 +50,4 @@
     (if id
 	(edit-post id title body)
 	(ins-post title body))
-    (redirect "/blog")))
+    (redirect (redir-url "blog"))))
