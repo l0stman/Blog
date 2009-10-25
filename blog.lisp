@@ -3,7 +3,7 @@
 (defvar *blog* nil)
 (defvar *title* "A Blog")
 (defvar *id* 0)
-(defvar *maxchar* 140)
+(defvar *maxchar* 320)
 (defvar *maxpost* 10)
 (defvar *proxy-uri* "/")
 

@@ -8,7 +8,8 @@
     :author "rrl <endian.sign@gmail.com>"
     :components ((:file "packages")
 		 (:file "macros" :depends-on ("packages"))
-		 (:file "blog" :depends-on ("packages" "macros"))
+		 (:file "css" :depends-on ("packages"))
+		 (:file "blog" :depends-on ("packages" "macros" "css"))
 		 (:file "new" :depends-on ("packages" "macros" "blog"))
 		 (:file "save" :depends-on ("packages" "blog"))
 		 (:file "admin" :depends-on ("packages" "macros" "blog" "save")))
