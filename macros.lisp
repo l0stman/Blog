@@ -1,8 +1,10 @@
 (in-package :blog)
 
-(defmacro with-html (&body body)
+(defmacro with-html ((&key title) &body body)
   `(with-html-output-to-string (*standard-output* nil :prologue t)
-     ,@body))
+     (:html
+      (:head (:title (str ,(or title *title*))))
+      (:body ,@body))))
 
 (defmacro with-html-str (&body body)
   `(with-html-output-to-string (*standard-output* nil)

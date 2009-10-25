@@ -10,29 +10,26 @@
 	  (setq title (title p))
 	  (setq body (body p)))))
     (with-auth
-	(with-html
-	  (:html
-	   (:head (:title (str *title*)))
-	   (:body
-	    (:form :method "post" :action "add"
-		   (when id
-		     (htm (:input :type "hidden" :name "id" :value id)))
-		   (:table :border 0
-			   (:tr
-			    (:td "title")
-			    (:td (:input :type "text"
-					 :name "title"
-					 :size 50
-					 :value  title)))
-			   (:tr
-			    (:td "body")
-			    (:td (:textarea :name "body"
-					    :rows 10
-					    :cols 50 (str body))))
-			   (:tr
-			    (:td)
-			    (:td
-			     (:input :type "submit" :value "add post")))))))))))
+	(with-html ()	  
+	  (:form :method "post" :action "add"
+		 (when id
+		   (htm (:input :type "hidden" :name "id" :value id)))
+		 (:table :border 0
+			 (:tr
+			  (:td "title")
+			  (:td (:input :type "text"
+				       :name "title"
+				       :size 50
+				       :value  title)))
+			 (:tr
+			  (:td "body")
+			  (:td (:textarea :name "body"
+					  :rows 10
+					  :cols 50 (str body))))
+			 (:tr
+			  (:td)
+			  (:td
+			   (:input :type "submit" :value "add post")))))))))
 
 (defun edit-post (id title body)
   (let ((p (find-post id)))

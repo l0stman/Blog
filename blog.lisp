@@ -95,21 +95,18 @@
 	 (blog (loop repeat (1+ (* (1- page) *maxpost*))
 		  for b on *blog*
 		  finally (return b))))
-    (with-html
-      (:html
-       (:head (:title (str *title*)))
-       (:body
-	(str (header))
-	(loop repeat *maxpost*
-	   for post in blog
-	   for rest on blog
-	   do (str (excerpt post :limitp t))
-	   finally (when (and rest (cdr rest))
-		     (htm
-		      (:a :href
-			  (conc "blog?page="
-				(write-to-string (1+ page)))
-			  "Next >>")))))))))
+    (with-html () 
+      (str (header))
+      (loop repeat *maxpost*
+	 for post in blog
+	 for rest on blog
+	 do (str (excerpt post :limitp t))
+	 finally (when (and rest (cdr rest))
+		   (htm
+		    (:a :href
+			(conc "blog?page="
+			      (write-to-string (1+ page)))
+			"Next >>")))))))
 
 (defun find-post (id)
   (find-if #'(lambda (p)
@@ -125,8 +122,6 @@
     ((id :parameter-type 'integer))
   (let ((p (find-post id)))
     (cond ((not p) (blog-error))
-	  (t (with-html
-	       (:html
-		(:head (:title (str (title p))))
-		(:body (str (header))
-		       (str (excerpt p)))))))))
+	  (t (with-html (:title (title p))
+	       (str (header))
+	       (str (excerpt p)))))))
