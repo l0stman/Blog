@@ -65,16 +65,14 @@
   (with-html-str
     (:div :class "post"
 	  (:a :href
-	      (conc "view?id="
-		    (write-to-string (id post)))
+	      (conc "view?id=" (write-to-string (id post)))
 	      (:span :class "post-title" (str (title post))))
 	  (:div :class "post-date" (str (date post)))
 	  (:div :class "post-body"
 		(let ((b (body post)))
-		  (esc (if limitp
-			   (handler-case
-			       (conc (subseq b 0 *maxchar*) "...")
-			     (error () b))
+		  (esc (or (and limitp
+				(ignore-errors
+				  (conc (subseq b 0 *maxchar*) "...")))
 			   b))))
 	  (:div :class "post-edit"
 		(:form :method "post" :action "new"

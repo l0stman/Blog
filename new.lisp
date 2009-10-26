@@ -7,8 +7,8 @@
     (when id
       (let ((p (find-post id)))
 	(when p
-	  (setq title (title p))
-	  (setq body (body p)))))
+	  (setf title (title p)
+		body (body p)))))
     (with-auth
 	(with-html ()	  
 	  (:form :method "post" :action "add"
@@ -34,8 +34,8 @@
 (defun edit-post (id title body)
   (let ((p (find-post id)))
     (cond (p  
-	   (setf (title p) title)
-	   (setf (body p) body))
+	   (setf (title p) title
+		 (body p) body))
 	  (t (blog-error)))))
 
 (define-easy-handler (add-post :uri "/add"
