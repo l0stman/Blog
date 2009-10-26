@@ -1,0 +1,67 @@
+html {
+    height: 100%;
+    width: 85%;
+    margin-left: 7.5%;
+}
+body,div,pre,form,input,blockquote {
+    padding:0;
+}
+body {
+    font:normal x-small verdana, arial, helvetica, sans-serif;
+    background-color:white;
+    z-index: 1;
+}
+div#header {
+    text-align: right;
+}
+
+div#title {
+    text-align: center;
+    font-size: 200%;
+    border: 1px solid #5f99cf;
+    background-color: #cee3f8;
+}
+
+textarea {
+    font: normal small verdana, arial, helvetica, sans-serif;
+    width: 31em;
+    height: 14em;
+}
+
+form#post input[type=text] { width: 34.3em; }
+form#admin input[type=text], input[type=password] { width: 7em; }
+form.post-edit input[type=submit] {
+    border: 0;
+    font-weight: bold;
+    font-size: 85%;
+    background-color: white;
+    color: gray;
+}
+
+table {
+    margin-top:10px; margin-bottom: 10px;
+    font-size: smaller;
+    padding-left: 1em;
+    background-color:#f0f0f0; color: gray;
+    border-collapse: collapse;
+}
+
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.separator { color:gray; margin: 0px .7ex 0px .7ex}
+.post-title {font-size: 130%; }
+.post-date {
+    color: #888;
+    font-size: 90%;
+}
+.postedit { font-size: 20%; }
+.message {
+    color: red;
+    background-color: pink;
+    width: 21em;
+    padding: 5px 10px;
+    border: 1px solid red;
+}
+
+p {text-indent: 3em}

@@ -8,9 +8,8 @@
   (with-auth
       (with-html () 
 	(:div :class "message" (str msg))
-	(:form :method "post" :action "update"
+	(:form :id "admin" :method "post" :action "update"
 	       (:table
-		:border 0
 		(loop
 		   for (desc name value type) in
 		   `(("Blog title" "title" ,(escape-string title)) 
@@ -23,8 +22,7 @@
 		       (:tr
 			(:td (str desc))
 			(:td (:input :type (or type "text")
-				     :name name
-				     :size 10
+				     :name name 
 				     :value value)))))
 		(:tr
 		 (:td)

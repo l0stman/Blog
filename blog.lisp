@@ -74,17 +74,19 @@
 				(ignore-errors
 				  (conc (subseq b 0 *maxchar*) "...")))
 			   b))))
-	  (:div :class "post-edit"
-		(:form :method "post" :action "new"
-		       (:input :type "hidden" :name "id" :value (id post))
-		       (:input :type "submit" :value "edit post"))))))
+	  (:div 
+	   (:form :method "post" :action "new" :class "post-edit"
+		  (:input :type "hidden" :name "id" :value (id post))
+		  (:input :type "submit" :name "action" :value "edit")
+		  (:input :type "submit" :name "action" :value "delete"))))))
+
 (defun header ()
   (with-html-str
     (:div :id "header"
-	  (:span (:a :href "new" "new"))
+	  (:a :href "new" "new")
 	  (:span :class "separator" "|")
-	  (:span (:a :href "admin" "admin")))
-    (:div :id "title" (:a :href "blog"(str *title*)))))
+	  (:a :href "admin" "admin"))
+    (:div :id "title" (:a :href "blog" (str *title*)))))
 
 (define-easy-handler (blog :uri "/blog"
 			   :default-request-type :get)
@@ -102,14 +104,11 @@
 	 finally (when (and rest (cdr rest))
 		   (htm
 		    (:a :href
-			(conc "blog?page="
-			      (write-to-string (1+ page)))
+			(conc "blog?page=" (write-to-string (1+ page)))
 			"Next >>")))))))
 
 (defun find-post (id)
-  (find-if #'(lambda (p)
-	       (= (id p) id))
-	   *blog*))
+  (find-if #'(lambda (p) (= (id p) id)) *blog*))
 
 (defun blog-error ()
   (setf (return-code*) +http-not-found+)
