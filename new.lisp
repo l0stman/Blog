@@ -1,5 +1,33 @@
 (in-package :blog)
 
+(defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
+
+(deffmt in-fmt (s)
+  ("(\\r\\n){2,}>((.|\\s)*?)(\\r\\n){2,}"
+   (list "<blockquote>"
+	 #'(lambda (m &rest regs)
+	     (declare (ignore m))
+	     (regex-replace-all ">" (second regs) ""))
+	 "</blockquote>")
+   :simple-calls t)
+  ("(\\r\\n){2,}" "<p>")
+  ("\\*([^*]*)\\*" "<strong>\\1</strong>")
+  ("_([^_]*)_" "<em>\\1</em>")
+  ("\\[([^]]+)\\]\\(([^)]+)\\)" "<a href=\"\\2\">\\1</a>"))
+
+(deffmt out-fmt (s)
+  ("<p>" *ret*)
+  ("<blockquote>((.|\\s)*?)</blockquote>" 
+   (list *ret* ">"
+	 #'(lambda (m &rest regs)
+	     (declare (ignore m))
+	     (regex-replace-all "(?<=\\r\\n)" (first regs) ">"))
+	 *ret*)
+   :simple-calls t)
+  ("</?strong>" "*")
+  ("</?em>" "_")
+  ("<a +href=\"([^\"]*)\">([\\w ]+)</a>" "[\\2](\\1)"))
+
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
     ((id :parameter-type 'integer) action)
@@ -27,24 +55,6 @@
 		       (:td)
 		       (:td
 			(:input :type "submit" :value "add post"))))))))))
-
-(defun edit-post (id title body)
-  (let ((p (find-post id)))
-    (cond (p  
-	   (setf (title p) title
-		 (body p) body))
-	  (t (blog-error)))))
-
-(defun delete-post (id)
-  (flet ((id= (p) (= id (id p))))
-    (labels ((drop (posts)
-	       (cond ((null (cdr posts)) nil)
-		     ((id= (cadr posts))
-		      (setf (cdr posts) (cddr posts)))
-		     (t (drop (cdr posts))))))
-      (cond ((null *blog*) nil)
-	    ((id= (car *blog*)) (setq *blog* (cdr *blog*)))
-	    (t (drop *blog*))))))
 
 (define-easy-handler (add-post :uri "/add"
 			       :default-request-type :post)

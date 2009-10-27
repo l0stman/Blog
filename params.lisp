@@ -51,3 +51,21 @@
 
 (defun find-post (id)
   (find-if #'(lambda (p) (= (id p) id)) *blog*))
+
+(defun edit-post (id title body)
+  (let ((p (find-post id)))
+    (cond (p  
+	   (setf (title p) title
+		 (body p) body))
+	  (t (blog-error)))))
+
+(defun delete-post (id)
+  (flet ((id= (p) (= id (id p))))
+    (labels ((drop (posts)
+	       (cond ((null (cdr posts)) nil)
+		     ((id= (cadr posts))
+		      (setf (cdr posts) (cddr posts)))
+		     (t (drop (cdr posts))))))
+      (cond ((null *blog*) nil)
+	    ((id= (car *blog*)) (setq *blog* (cdr *blog*)))
+	    (t (drop *blog*))))))
