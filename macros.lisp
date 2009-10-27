@@ -4,7 +4,7 @@
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      (:html
       (:head (:title (str ,(or title (load-time-value *title*)))))
-      (:link :rel "stylesheet" :type "text/css" :href "/blog.css")
+      (:link :rel "stylesheet" :type "text/css" :href "blog.css")
       (:body ,@body))))
 
 (defmacro with-html-str (&body body)
