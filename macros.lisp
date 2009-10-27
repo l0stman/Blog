@@ -1,5 +1,15 @@
 (in-package :blog)
 
+(defvar *css*
+  (make-pathname
+   :name "blog"
+   :type "css"
+   :defaults (load-time-value
+	      (or #.*compile-file-pathname* *load-pathname*))))
+
+(push (create-static-file-dispatcher-and-handler "/blog.css" *css* "text/css")
+      *dispatch-table*)
+
 (defmacro with-html ((&key title) &body body)
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      (:html
@@ -18,3 +28,22 @@
 		 (equalp (hash pass) *hash*))
 	    ,@body)
 	   (t (require-authorization *title*)))))
+
+(defmacro deffmt (name (s) &body body)
+  `(defun ,name (,s)
+     (let*
+	 ,(loop for p in body collect
+	       `(,s (regex-replace-all ,(first p) ,s ,(second p))))
+       s)))
+
+(deffmt in-fmt (s)
+  ("(\\r\\n){2,}" "<p>")
+  ("\\*([^*]*)\\*" "<strong>\\1</strong>")
+  ("_([^_]*)_" "<em>\\1</em>")
+  ("\\[([^]]+)\\]\\(([^)]+)\\)" "<a href=\"\\2\">\\1</a>"))
+
+(deffmt out-fmt (s)
+  ("<p>" (format nil "~a~a" #\return #\return))
+  ("</?strong>" "*")
+  ("</?em>" "_")
+  ("<a +href=\"([^\"]*)\">([\\w ]+)</a>" "[\\2](\\1)"))

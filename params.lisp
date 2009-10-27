@@ -26,3 +26,28 @@
 
 (defvar *user* "admin")
 (defvar *hash* (hash "admin"))
+
+(defclass post ()
+  ((title
+    :initarg :title
+    :reader title
+    :writer (setf title))
+   (body
+    :initarg :body
+    :reader body
+    :writer (setf body))
+   (id
+    :initarg :id
+    :reader id
+    :initform (incf *id*))
+   (date
+    :initarg :date
+    :reader date
+    :initform (sys-time))))
+
+(defun ins-post (title body)
+  (push (make-instance 'post :title title :body body)
+	*blog*))
+
+(defun find-post (id)
+  (find-if #'(lambda (p) (= (id p) id)) *blog*))

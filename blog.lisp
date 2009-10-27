@@ -1,23 +1,5 @@
 (in-package :blog)
 
-(defclass post ()
-  ((title
-    :initarg :title
-    :reader title
-    :writer (setf title))
-   (body
-    :initarg :body
-    :reader body
-    :writer (setf body))
-   (id
-    :initarg :id
-    :reader id
-    :initform (incf *id*))
-   (date
-    :initarg :date
-    :reader date
-    :initform (sys-time))))
-
 (defun sys-time ()
     (multiple-value-bind
 	  (second minute hour date month year) (get-decoded-time)
@@ -29,10 +11,6 @@
 	      hour
 	      minute
 	      second)))
-
-(defun ins-post (title body)
-  (push (make-instance 'post :title title :body body)
-	*blog*))
 
 (defun excerpt (post &key limitp)
   (with-html-str
@@ -85,9 +63,6 @@
 		   (str (link pp (1- page) "prev"))
 		   (htm (:span :class "separator" (str (when (and pp pn) "|"))))
 		   (str (link pn (1+ page) "next")))))))
-
-(defun find-post (id)
-  (find-if #'(lambda (p) (= (id p) id)) *blog*))
 
 (defun blog-error ()
   (setf (return-code*) +http-not-found+)
