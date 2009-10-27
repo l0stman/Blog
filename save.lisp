@@ -35,3 +35,7 @@
       (let* ((*package* (find-package :blog)))
 	(read in)
 	(setq *blog* (read in))))))
+
+
+(when (probe-file *db*)
+  (load-blog))
