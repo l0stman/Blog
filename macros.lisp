@@ -3,7 +3,7 @@
 (defmacro with-html ((&key title) &body body)
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      (:html
-      (:head (:title (str ,(or title (load-time-value *title*)))))
+      (:head (:title (str ,(or title *title*))))
       (:link :rel "stylesheet" :type "text/css" :href "blog.css")
       (:body ,@body))))
 
