@@ -70,15 +70,14 @@
 	  (:div :class "post-date" (str (date post)))
 	  (:div :class "post-body"
 		(let ((b (body post)))
-		  (esc (or (and limitp
+		  (str (or (and limitp
 				(ignore-errors
 				  (conc (subseq b 0 *maxchar*) "...")))
 			   b))))
-	  (:div 
-	   (:form :method "post" :action "new" :class "post-edit"
-		  (:input :type "hidden" :name "id" :value (id post))
-		  (:input :type "submit" :name "action" :value "edit")
-		  (:input :type "submit" :name "action" :value "delete"))))))
+	  (:form :method "post" :action "new" :class "post-edit"
+		 (:input :type "hidden" :name "id" :value (id post))
+		 (:input :type "submit" :name "action" :value "edit")
+		 (:input :type "submit" :name "action" :value "delete")))))
 
 (defun header ()
   (with-html-str
@@ -87,6 +86,13 @@
 	  (:span :class "separator" "|")
 	  (:a :href "admin" "admin"))
     (:div :id "title" (:a :href "blog" (str *title*)))))
+
+(defmacro link (pred page msg)
+  `(with-html-str
+     (when ,pred
+      (htm
+       (:a :class "page"
+	   :href (conc "blog?page=" (write-to-string ,page)) ,msg)))))
 
 (define-easy-handler (blog :uri "/blog"
 			   :default-request-type :get)
@@ -101,11 +107,11 @@
 	 for post in blog
 	 for rest on blog
 	 do (str (excerpt post :limitp t))
-	 finally (when (and rest (cdr rest))
-		   (htm
-		    (:a :href
-			(conc "blog?page=" (write-to-string (1+ page)))
-			"Next >>")))))))
+	 finally (let ((pp (> page 1))
+		       (pn (and rest (cdr rest))))
+		   (str (link pp (1- page) "prev"))
+		   (htm (:span :class "separator" (str (when (and pp pn) "|"))))
+		   (str (link pn (1+ page) "next")))))))))
 
 (defun find-post (id)
   (find-if #'(lambda (p) (= (id p) id)) *blog*))

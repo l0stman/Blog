@@ -22,7 +22,7 @@
 		       (:td (:input :type "text" :name "title" :value  title)))
 		      (:tr
 		       (:td "body")
-		       (:td (:textarea :name "body" (str body))))
+		       (:td (:textarea :name "body" (str (out-fmt body)))))
 		      (:tr
 		       (:td)
 		       (:td
@@ -36,15 +36,15 @@
 	  (t (blog-error)))))
 
 (defun delete-post (id)
-  (labels ((id= (p) (= id (id p)))
-	   (drop (posts)
-	     (cond ((null posts) nil)
-		   ((id= (cadr posts))
-		    (setf (cdr posts) (cddr posts)))
-		   (t (drop (cdr posts))))))
-    (cond ((null *blog*) nil)
-	  ((id= (car *blog*)) (setq *blog* (cdr *blog*)))
-	  (t (drop *blog*)))))
+  (flet ((id= (p) (= id (id p))))
+    (labels ((drop (posts)
+	       (cond ((null (cdr posts)) nil)
+		     ((id= (cadr posts))
+		      (setf (cdr posts) (cddr posts)))
+		     (t (drop (cdr posts))))))
+      (cond ((null *blog*) nil)
+	    ((id= (car *blog*)) (setq *blog* (cdr *blog*)))
+	    (t (drop *blog*))))))
 
 (define-easy-handler (add-post :uri "/add"
 			       :default-request-type :post)
@@ -53,6 +53,6 @@
       (when (string= title "")
 	(setq title "No title"))
     (if id
-	(edit-post id title body)
-	(ins-post title body))
+	(edit-post id title (in-fmt body))
+	(ins-post title (in-fmt body)))
     (redirect (redir-url "blog"))))
