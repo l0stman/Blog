@@ -8,7 +8,7 @@ body,div,pre,form,input,blockquote {
 }
 
 body {
-    font:normal x-small verdana, arial, helvetica, sans-serif;
+    font-family:normal x-small verdana, arial, helvetica, sans-serif;
     background-color:white;
     z-index: 1;
 }
@@ -25,6 +25,7 @@ div#header {
 
 div#title {
     text-align: center;
+    font-family:normal x-small verdana, arial, helvetica, sans-serif;
     font-weight: bold;
     font-size: 200%;
     border: 1px solid #5f99cf;
@@ -38,12 +39,12 @@ textarea {
 }
 
 form#post input[type=text] { width: 34.3em; }
-form#admin input[type=text], input[type=password] { width: 7em; }
+form#admin input[type=text], input[type=password] { width: 9em; }
 form.post-edit input[type=submit] {
     border: 0;
     font-weight: bold;
+     background-color: white;
     font-size: 85%;
-    background-color: white;
     color: gray;
 }
 
@@ -58,10 +59,12 @@ table {
 a { text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-.separator { color:gray; margin: 0px .7ex 0px .7ex}
-.post {
-    margin-top: 0.5em;
+input[type=text], input[type=password], textarea {
+    border: 1px solid #369;
 }
+
+.separator { color:gray; margin: 0px .6ex 0px .6ex}
+div.post {margin-top: 0.5em; }
 .page {
     font-size: 80%;
 }

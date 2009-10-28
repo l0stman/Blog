@@ -64,10 +64,6 @@
 		   (htm (:span :class "separator" (str (when (and pp pn) "|"))))
 		   (str (link pn (1+ page) "next")))))))
 
-(defun blog-error ()
-  (setf (return-code*) +http-not-found+)
-  nil)
-
 (define-easy-handler (view-post :uri "/view"
 				:default-request-type :get)
     ((id :parameter-type 'integer))

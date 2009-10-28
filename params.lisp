@@ -45,6 +45,10 @@
     :reader date
     :initform (sys-time))))
 
+(defun blog-error ()
+  (setf (return-code*) +http-not-found+)
+  nil)
+
 (defun ins-post (title body)
   (push (make-instance 'post :title title :body body)
 	*blog*))

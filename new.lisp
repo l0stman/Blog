@@ -3,11 +3,11 @@
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
 (deffmt in-fmt (s)
-  ("(\\r\\n){2,}>((.|\\s)*?)(\\r\\n){2,}"
+  ("(^(\\r\\n)?|(\\r\\n){2,})>((.|\\s)*?)((\\r\\n){2,}|$)"
    (list "<blockquote>"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
-	     (regex-replace-all ">" (second regs) ""))
+	     (regex-replace-all ">" (fourth regs) ""))
 	 "</blockquote>")
    :simple-calls t)
   ("(\\r\\n){2,}" "<p>")
@@ -28,41 +28,50 @@
   ("</?em>" "_")
   ("<a +href=\"([^\"]*)\">([\\w ]+)</a>" "[\\2](\\1)"))
 
+(defun add-post (id title body) 
+  (when (string= title "")
+    (setq title "No title"))
+  (if id
+      (edit-post id title (in-fmt body))
+      (ins-post title (in-fmt body)))
+  (redirect (redir-url "blog")))
+
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
-    ((id :parameter-type 'integer) action)
+    ((id :parameter-type 'integer) title body action)
   (with-auth
-      (if (string= action "delete")
-	  (progn (delete-post id) (redirect (redir-url "blog"))) 
-	  (let ((title "") (body ""))
-	    (when id
-	      (let ((p (find-post id)))
-		(when p
-		  (setf title (title p)
-			body (body p))))) 
-	    (with-html ()	  
-	      (:form :id "post" :method "post" :action "add"
-		     (when id
-		       (htm (:input :type "hidden" :name "id" :value id)))
-		     (:table
-		      (:tr
-		       (:td "title")
-		       (:td (:input :type "text" :name "title" :value  title)))
-		      (:tr
-		       (:td "body")
-		       (:td (:textarea :name "body" (str (out-fmt body)))))
-		      (:tr
-		       (:td)
-		       (:td
-			(:input :type "submit" :value "add post"))))))))))
+      (cond ((string= action "delete")
+	     (delete-post id)
+	     (redirect (redir-url "blog")))
+	    ((string= action "add") (add-post id title body)) 
+	    (t
+	     (cond ((string= action "view")
+		    (setf title (post-parameter "title")
+			  body (post-parameter "body")))
+		   (id
+		    (let ((p (find-post id)))
+		      (when p
+			(setf title (title p)
+			      body (body p)))))) 
+	     (with-html ()	  
+	       (:form :method "post" :action "new" 
+		      (when id
+			(htm (:input :type "hidden" :name "id" :value id))) 
+		      (:div :class "post-title" (str title))
+		      (:div :class "post-body" (str (in-fmt body)))
+		      (:table
+		       (:tr
+			(:td "title")
+			(:td (:input :type "text" :name "title" :value  title)))
+		       (:tr
+			(:td "body")
+			(:td (:textarea :name "body" (str (out-fmt body)))))
+		       (:tr
+			(:td)
+			(:td
+			 (:input :type "submit" :name "action" :value "add")
+			 (:span :class "separator" " ")
+			 (:input :type "submit"  :name "action"
+				 :value "view"))))))))))
 
-(define-easy-handler (add-post :uri "/add"
-			       :default-request-type :post)
-    (title body (id :parameter-type 'integer))
-  (with-auth
-      (when (string= title "")
-	(setq title "No title"))
-    (if id
-	(edit-post id title (in-fmt body))
-	(ins-post title (in-fmt body)))
-    (redirect (redir-url "blog"))))
+
