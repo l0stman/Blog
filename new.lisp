@@ -2,8 +2,8 @@
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
-(deffmt in-fmt (s)
-  ("(^(\\r\\n)?|(\\r\\n){2,})>((.|\\s)*?)((\\r\\n){2,}|$)"
+(deffmt in-fmt (s :start escape-string)
+  ("(^(\\r\\n)?|(\\r\\n){2,})&gt;((.|\\s)*?)((\\r\\n){2,}|$)"
    (list "<blockquote>"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
@@ -15,7 +15,14 @@
   ("_([^_]*)_" "<em>\\1</em>")
   ("\\[([^]]+)\\]\\(([^)]+)\\)" "<a href=\"\\2\">\\1</a>"))
 
-(deffmt out-fmt (s)
+(deffmt unesc (s)
+  ("&lt;" "<") ("&gt;" ">") ("&#039;" "'") ("&quot;" "\"")
+  ("&#(\\d+);" #'(lambda (m reg1)
+		   (declare (ignore m))
+		   (format nil "~a" (code-char (parse-integer reg1))))
+	       :simple-calls t))
+
+(deffmt out-fmt (s :end unesc)
   ("<p>" *ret*)
   ("<blockquote>((.|\\s)*?)</blockquote>" 
    (list *ret* ">"
@@ -32,8 +39,8 @@
   (when (string= title "")
     (setq title "No title"))
   (if id
-      (edit-post id title (in-fmt body))
-      (ins-post title (in-fmt body)))
+      (edit-post id (in-fmt title) (in-fmt body))
+      (ins-post (in-fmt title) (in-fmt body)))
   (redirect (redir-url "blog")))
 
 (define-easy-handler (new-post :uri "/new"
@@ -51,21 +58,22 @@
 		   (id
 		    (let ((p (find-post id)))
 		      (when p
-			(setf title (title p)
-			      body (body p)))))) 
+			(setf title (out-fmt (title p))
+			      body (out-fmt (body p))))))) 
 	     (with-html ()	  
 	       (:form :method "post" :action "new" 
 		      (when id
 			(htm (:input :type "hidden" :name "id" :value id))) 
-		      (:div :class "post-title" (str title))
+		      (:div :class "post-title" (str (in-fmt title)))
 		      (:div :class "post-body" (str (in-fmt body)))
 		      (:table
 		       (:tr
 			(:td "title")
-			(:td (:input :type "text" :name "title" :value  title)))
+			(:td
+			 (:input :type "text" :name "title" :value (esc title))))
 		       (:tr
 			(:td "body")
-			(:td (:textarea :name "body" (str (out-fmt body)))))
+			(:td (:textarea :name "body" (str body))))
 		       (:tr
 			(:td)
 			(:td
@@ -73,5 +81,3 @@
 			 (:span :class "separator" " ")
 			 (:input :type "submit"  :name "action"
 				 :value "view"))))))))))
-
-

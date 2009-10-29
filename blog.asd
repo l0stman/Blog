@@ -6,7 +6,7 @@
 (defsystem "blog"
     :description "a simple blog engine."
     :author "rrl <endian.sign@gmail.com>"
-    :components ((:file "packages")
+    :components ((:file "packages") 
 		 (:file "params" :depends-on ("packages")) 
 		 (:file "save" :depends-on ("params"))
 		 (:file "macros" :depends-on ("save")) 
