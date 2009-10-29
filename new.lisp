@@ -7,7 +7,7 @@
    (list "<blockquote>"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
-	     (regex-replace-all ">" (fourth regs) ""))
+	     (regex-replace-all "&gt;" (fourth regs) ""))
 	 "</blockquote>")
    :simple-calls t)
   ("(\\r\\n){2,}" "<p>")
@@ -69,8 +69,8 @@
 		      (:table
 		       (:tr
 			(:td "title")
-			(:td
-			 (:input :type "text" :name "title" :value (esc title))))
+			(:td (:input :type "text" :name "title"
+				     :value (escape-string title))))
 		       (:tr
 			(:td "body")
 			(:td (:textarea :name "body" (str body))))
