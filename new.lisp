@@ -41,6 +41,7 @@
   (if id
       (edit-post id (in-fmt title) (in-fmt body))
       (ins-post (in-fmt title) (in-fmt body)))
+  (save-blog)
   (redirect (redir-url "blog")))
 
 (define-easy-handler (new-post :uri "/new"
