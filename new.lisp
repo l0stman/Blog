@@ -42,7 +42,7 @@
       (edit-post id (in-fmt title) (in-fmt body))
       (ins-post (in-fmt title) (in-fmt body)))
   (save-blog)
-  (redirect (redir-url "blog")))
+  (redirect "/blog"))
 
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
@@ -50,7 +50,7 @@
   (with-auth
       (cond ((string= action "delete")
 	     (delete-post id)
-	     (redirect (redir-url "blog")))
+	     (redirect "/blog"))
 	    ((string= action "add") (add-post id title body)) 
 	    (t
 	     (cond ((string= action "view")

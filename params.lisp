@@ -5,10 +5,6 @@
 (defvar *id* 0)
 (defvar *maxchar* 320)
 (defvar *maxpost* 10)
-(defvar *proxy-uri* "/")
-
-(defun redir-url (s)
-  (concatenate 'string *proxy-uri* s))
 
 (defun salt ()
   (let* ((size 5)

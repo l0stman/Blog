@@ -58,4 +58,4 @@
 		   *maxchar* maxchar
 		   *maxpost* maxpost)
 	     (save-blog)
-	     (redirect (redir-url "blog"))))))
+	     (redirect "/blog")))))
