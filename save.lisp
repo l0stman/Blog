@@ -4,13 +4,15 @@
 
 (defmethod print-object ((p post) s)
   (if *print-readably*
-      (with-slots (title body id date) p
-	(format s
-		"#.(make-instance 'post :title ~S :body ~S :id ~d :date ~S)"
-		title
-		body
-		id
-		date))
+      (with-slots (title body id date stub) p
+	(format
+	 s
+	 "#.(make-instance 'post :title ~S :body ~S :id ~d :date ~S :stub ~S)" 
+	 title
+	 body
+	 id
+	 date
+	 stub))
       (call-next-method)))
 
 (defparameter *params*

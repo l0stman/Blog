@@ -23,6 +23,18 @@
 (defvar *user* "admin")
 (defvar *hash* (hash "admin"))
 
+(defun sys-time ()
+    (multiple-value-bind
+	  (second minute hour date month year) (get-decoded-time)
+      (format nil
+	      "~2,'0d/~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d"
+	      date
+	      month
+	      year
+	      hour
+	      minute
+	      second)))
+
 (defclass post ()
   ((title
     :initarg :title
@@ -32,6 +44,11 @@
     :initarg :body
     :reader body
     :writer (setf body))
+   (stub
+    :initarg :stub
+    :reader stub
+    :writer (setf stub)
+    :initform "")
    (id
     :initarg :id
     :reader id
@@ -41,13 +58,23 @@
     :reader date
     :initform (sys-time))))
 
+(defun make-post (title body)
+  (make-instance 'post
+		 :title title
+		 :body (in-fmt body)
+		 :stub (in-fmt (excerpt body))))
+
+(defun excerpt (text)
+  (or (ignore-errors
+	(format nil "~a..." (subseq text 0 *maxchar*)))
+      text))
+
 (defun blog-error ()
   (setf (return-code*) +http-not-found+)
   nil)
 
 (defun ins-post (title body)
-  (push (make-instance 'post :title title :body body)
-	*blog*))
+  (push (make-post title body) *blog*))
 
 (defun find-post (id)
   (find-if #'(lambda (p) (= (id p) id)) *blog*))
@@ -56,7 +83,8 @@
   (let ((p (find-post id)))
     (cond (p  
 	   (setf (title p) title
-		 (body p) body))
+		 (body p) (in-fmt body)
+		 (stub p) (in-fmt (excerpt body))))
 	  (t (blog-error)))))
 
 (defun delete-post (id)

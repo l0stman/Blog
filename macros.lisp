@@ -29,12 +29,3 @@
 	    ,@body)
 	   (t (require-authorization *title*)))))
 
-(defmacro deffmt (name (s &key start end) &body body)
-  (flet ((call (fn) `(,s ,(if fn `(,fn ,s) s))))
-   `(defun ,name (,s)
-      (let*
-	  (,(call start)
-	   ,@(loop for p in body collect
-		  `(,s (regex-replace-all ,(first p) ,s ,@(cdr p))))
-	    ,(call end)) 
-	s))))

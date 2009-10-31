@@ -1,30 +1,13 @@
 (in-package :blog)
 
-(defun sys-time ()
-    (multiple-value-bind
-	  (second minute hour date month year) (get-decoded-time)
-      (format nil
-	      "~2,'0d/~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d"
-	      date
-	      month
-	      year
-	      hour
-	      minute
-	      second)))
-
-(defun excerpt (post &key limitp)
+(defun show (post &key limitp)
   (with-html-str
     (:div :class "post"
 	  (:a :href
 	      (conc "view?id=" (write-to-string (id post)))
 	      (:span :class "post-title" (str (title post))))
 	  (:div :class "post-date" (str (date post)))
-	  (:div :class "post-body"
-		(let ((b (body post)))
-		  (str (or (and limitp
-				(ignore-errors
-				  (conc (subseq b 0 *maxchar*) "...")))
-			   b))))
+	  (:div :class "post-body" (str (if limitp (stub post) (body post))))
 	  (:form :method "post" :action "new" :class "post-edit"
 		 (:input :type "hidden" :name "id" :value (id post))
 		 (:input :type "submit" :name "action" :value "edit")
@@ -57,7 +40,7 @@
       (loop repeat *maxpost*
 	 for post in blog
 	 for rest on blog
-	 do (str (excerpt post :limitp t))
+	 do (str (show post :limitp t))
 	 finally (let ((pp (> page 1))
 		       (pn (and rest (cdr rest))))
 		   (str (link pp (1- page) "prev"))
@@ -71,4 +54,4 @@
     (cond ((not p) (blog-error))
 	  (t (with-html (:title (title p))
 	       (str (header))
-	       (str (excerpt p)))))))
+	       (str (show p)))))))
