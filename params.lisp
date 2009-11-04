@@ -47,8 +47,7 @@
    (stub
     :initarg :stub
     :reader stub
-    :writer (setf stub)
-    :initform "")
+    :writer (setf stub))
    (id
     :initarg :id
     :reader id
@@ -65,8 +64,8 @@
 		 :stub (in-fmt (excerpt body))))
 
 (defun excerpt (text)
-  (or (ignore-errors
-	(format nil "~a..." (subseq text 0 *maxchar*)))
+  (if (array-in-bounds-p text (1- *maxchar*))
+      (format nil "~a..." (subseq text 0 *maxchar*))
       text))
 
 (defun blog-error ()
