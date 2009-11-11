@@ -27,7 +27,7 @@
   ("--" "&mdash;"))
 
 (deffmt unesc (s)
-  ("&lt;" "<") ("&gt;" ">") ("&#039;" "'") ("&quot;" "\"")
+  ("&lt;" "<") ("&gt;" ">") ("&quot;" "\"")
   ("&(#x?[\\da-fA-F]+);"
    #'(lambda (m r1)
        (declare (ignore m))
