@@ -23,6 +23,13 @@
   `(with-html-output-to-string (*standard-output* nil)
      ,@body))
 
+(defmacro defhand (name (uri) &body body)
+  "Define a handler for a function without argument."
+  `(progn
+     (defun ,name () ,@body)
+     (push (create-prefix-dispatcher ,uri ',name)
+	   *dispatch-table*)))
+
 (defmacro w/syms (args &body body)
   `(let ,(mapcar #'(lambda (x) `(,x (gensym)))
 		 args)

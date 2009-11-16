@@ -10,6 +10,7 @@
 		 (:file "fmt" :depends-on ("packages"))
 		 (:file "login" :depends-on ("macros"))
 		 (:file "verify" :depends-on ("login"))
+		 (:file "logout" :depends-on ("verify"))
 		 (:file "params" :depends-on ("fmt")) 
 		 (:file "save" :depends-on ("params"))
 		 (:file "macros" :depends-on ("save")) 

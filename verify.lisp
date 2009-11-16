@@ -9,4 +9,4 @@
 	 (login :user user :msg "Invalid password." :uri uri))
 	(t
 	 (set-cookie "t" :value (encode-cookie))
-	 (redirect (if (string= uri "/login") "/blog" uri)))))
+	 (redirect uri))))

@@ -34,8 +34,9 @@
 (defvar *session-max-time* 3600
   "The time in seconds after which the cookie expires if unused.")
 
-(defun expiredp (x)
-  (< (+ x *session-max-time*) (get-universal-time)))
+(defun expiredp (time)
+  (aif (parse-integer time :junk-allowed t)
+    (< (+ it *session-max-time*) (get-universal-time))))
 
 (defun encode-cookie ()
   "Return a string containing the current time and its MAC separated by &."
@@ -52,12 +53,18 @@
 	 (values (subseq c 0 p)
 		 (sto (subseq c (1+ p)))))))
 
+(defhand logout ("/logout")
+  (set-cookie "t" :expires (1- (get-universal-time)))
+  (redirect (referer)))
+
 (defun loggedp ()
   "Verify if the client is logged in."
   (aif (cookie-in "t")
     (multiple-value-bind (time digest) (decode-cookie it) 
       (and time
-	   (trustedp time digest)))))
+	   (if (expiredp time)
+	       (progn (logout) nil)
+	       (trustedp time digest))))))
 
 (proclaim '(inline salt))
 (defun salt () (random-octets 5))
@@ -87,7 +94,7 @@
   (w/html ()
     (if msg (htm (:div :class "message" (str msg))))
     (:form :method "post" :action "/verify"
-	   (:input :type "hidden" :name "uri" :value (or uri (request-uri*)))
+	   (:input :type "hidden" :name "uri" :value (or uri (referer)))
 	   (:table
 	    (:tr
 	     (:td "username")
