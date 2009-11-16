@@ -1,7 +1,7 @@
 (in-package :blog)
 
 (defun show (post &key limitp)
-  (with-html-str
+  (html/s
     (:div :class "post"
 	  (:a :href
 	      (conc "view?id=" (write-to-string (id post)))
@@ -14,7 +14,7 @@
 		 (:input :type "submit" :name "action" :value "delete")))))
 
 (defun header ()
-  (with-html-str
+  (html/s
     (:div :id "header"
 	  (:a :href "new" "new")
 	  (:span :class "separator" "|")
@@ -22,7 +22,7 @@
     (:div :id "title" (:a :href "blog" (str *title*)))))
 
 (defmacro link (pred page msg)
-  `(with-html-str
+  `(html/s
      (when ,pred
       (htm
        (:a :class "page"
@@ -35,7 +35,7 @@
 	 (blog (loop repeat (1+ (* (1- page) *maxpost*))
 		  for b on *blog*
 		  finally (return b))))
-    (with-html () 
+    (w/html () 
       (str (header))
       (loop repeat *maxpost*
 	 for post in blog
@@ -52,6 +52,6 @@
     ((id :parameter-type 'integer))
   (let ((p (find-post id)))
     (cond ((not p) (blog-error))
-	  (t (with-html (:title (title p))
+	  (t (w/html (:title (title p))
 	       (str (header))
 	       (str (show p)))))))

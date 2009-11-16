@@ -12,7 +12,7 @@
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
     ((id :parameter-type 'integer) title body action)
-  (with-auth
+  (w/auth
       (cond ((string= action "delete")
 	     (delete-post id)
 	     (redirect "/blog"))
@@ -26,7 +26,7 @@
 		      (when p
 			(setf title (out-fmt (title p))
 			      body (out-fmt (body p))))))) 
-	     (with-html ()	  
+	     (w/html ()	  
 	       (:form :method "post" :action "new" 
 		      (when id
 			(htm (:input :type "hidden" :name "id" :value id))) 

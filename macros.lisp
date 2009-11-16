@@ -10,18 +10,21 @@
 (push (create-static-file-dispatcher-and-handler "/blog.css" *css* "text/css")
       *dispatch-table*)
 
-(defmacro with-html ((&key title) &body body)  
+(defmacro w/html ((&key title) &body body)
+  "Write html code to the standard output with a header."
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      (:html
       (:head (:title (str (or ,title *title*))))
       (:link :rel "stylesheet" :type "text/css" :href "blog.css")
       (:body ,@body))))
 
-(defmacro with-html-str (&body body)
+(defmacro html/s (&body body)
+  "Write the html strings to the standard output."
   `(with-html-output-to-string (*standard-output* nil)
      ,@body))
 
-(defmacro with-auth (&rest body)
+(defmacro w/auth (&rest body)
+  "Verify that the resource needs authentication."
   `(multiple-value-bind
 	 (user pass) (authorization)
      (cond ((and (string= user *user*)

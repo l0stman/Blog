@@ -5,8 +5,8 @@
 	      (maxchar *maxchar*)
 	      (maxpost *maxpost*)
 	      (msg "Enter the new values:"))
-  (with-auth
-      (with-html () 
+  (w/auth
+      (w/html () 
 	(:div :class "message" (str msg))
 	(:form :id "admin" :method "post" :action "update"
 	       (:table
@@ -39,7 +39,7 @@
      password
      (maxchar :parameter-type 'integer)
      (maxpost :parameter-type 'integer))
-  (with-auth
+  (w/auth
       (cond ((or (string= password "")
 		 (not maxchar)
 		 (not maxpost)
