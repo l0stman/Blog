@@ -24,9 +24,9 @@
 
 (defun digest (data)
   "Compute the digest of the string data."
-  (let ((hmac (ironclad:make-hmac *secret-key* :sha256))) 
-    (ironclad:update-hmac hmac (sto data))
-    (ironclad:hmac-digest hmac)))
+  (let ((hmac (make-hmac *secret-key* :sha256))) 
+    (update-hmac hmac (sto data))
+    (hmac-digest hmac)))
 
 (defun trustedp (data digest)
   (equalp (digest data) digest))
@@ -58,6 +58,28 @@
     (multiple-value-bind (time digest) (decode-cookie it) 
       (and time
 	   (trustedp time digest)))))
+
+(proclaim '(inline salt))
+(defun salt () (random-octets 5))
+
+(defvar *salt* (salt))
+
+(defun hash (pass)
+  "Compute the password digest using SHA1."
+  (digest-sequence
+   :sha1
+   (concatenate '(simple-array (unsigned-byte 8) (*))
+		*salt*
+		(sto pass))))
+
+(defvar *user* "admin")
+(defvar *hash* (hash "admin"))
+
+(defmacro w/auth (&rest body)
+  "Assure that the access to the resource needs authentication."
+  `(if (loggedp)
+       (progn ,@body)
+       (redirect "/login")))
 
 (define-easy-handler (login :uri "/login"
 			    :default-request-type :post)

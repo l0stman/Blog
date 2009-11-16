@@ -23,15 +23,6 @@
   `(with-html-output-to-string (*standard-output* nil)
      ,@body))
 
-(defmacro w/auth (&rest body)
-  "Verify that the resource needs authentication."
-  `(multiple-value-bind
-	 (user pass) (authorization)
-     (cond ((and (string= user *user*)
-		 (equalp (hash pass) *hash*))
-	    ,@body)
-	   (t (require-authorization *title*)))))
-
 (defmacro w/syms (args &body body)
   `(let ,(mapcar #'(lambda (x) `(,x (gensym)))
 		 args)

@@ -8,10 +8,12 @@
     :author "rrl <endian.sign@gmail.com>"
     :components ((:file "packages")
 		 (:file "fmt" :depends-on ("packages"))
+		 (:file "login" :depends-on ("macros"))
+		 (:file "verify" :depends-on ("login"))
 		 (:file "params" :depends-on ("fmt")) 
 		 (:file "save" :depends-on ("params"))
 		 (:file "macros" :depends-on ("save")) 
 		 (:file "blog" :depends-on ("macros"))
 		 (:file "new" :depends-on ("blog")) 
 		 (:file "admin" :depends-on ("blog" "save")))
-    :depends-on (:hunchentoot :cl-who :md5 :cl-ppcre))
+    :depends-on (:hunchentoot :cl-who :cl-ppcre :ironclad))

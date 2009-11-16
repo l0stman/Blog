@@ -6,23 +6,6 @@
 (defvar *maxchar* 320)
 (defvar *maxpost* 10)
 
-(defun salt ()
-  (let* ((size 5)
-	 (s (make-array size
-			:fill-pointer 0
-			:element-type 'character)))
-    (loop repeat size
-       do (vector-push (code-char (random 128)) s)
-       finally (return s))))
-
-(defvar *salt* (salt))
-
-(defun hash (pass)
-  (md5sum-sequence (concatenate 'string *salt* pass)))
-
-(defvar *user* "admin")
-(defvar *hash* (hash "admin"))
-
 (defun sys-time ()
     (multiple-value-bind
 	  (second minute hour date month year) (get-decoded-time)

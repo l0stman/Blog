@@ -1,6 +1,7 @@
 (in-package :blog)
 
-(defun add-post (id title body) 
+(defun add-post (id title body)
+  "Add a new post or edit an existing one."
   (when (string= title "")
     (setq title "No title"))
   (if id
@@ -8,6 +9,30 @@
       (ins-post title body))
   (save-blog)
   (redirect "/blog"))
+
+(defun new-form (&key id title body)
+  "Form to add or edit a post."
+  (w/html ()	  
+    (:form :method "post" :action "new" 
+	   (when id
+	     (htm (:input :type "hidden" :name "id" :value id))) 
+	   (:div :class "post-title" (str (in-fmt title)))
+	   (:div :class "post-body" (str (in-fmt body)))
+	   (:table
+	    (:tr
+	     (:td "title")
+	     (:td (:input :type "text" :name "title"
+			  :value (escape-string title))))
+	    (:tr
+	     (:td "body")
+	     (:td (:textarea :name "body" (str body))))
+	    (:tr
+	     (:td)
+	     (:td
+	      (:input :type "submit" :name "action" :value "add")
+	      (:span :class "separator" " ")
+	      (:input :type "submit"  :name "action"
+		      :value "view")))))))
 
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
@@ -26,24 +51,4 @@
 		      (when p
 			(setf title (out-fmt (title p))
 			      body (out-fmt (body p))))))) 
-	     (w/html ()	  
-	       (:form :method "post" :action "new" 
-		      (when id
-			(htm (:input :type "hidden" :name "id" :value id))) 
-		      (:div :class "post-title" (str (in-fmt title)))
-		      (:div :class "post-body" (str (in-fmt body)))
-		      (:table
-		       (:tr
-			(:td "title")
-			(:td (:input :type "text" :name "title"
-				     :value (escape-string title))))
-		       (:tr
-			(:td "body")
-			(:td (:textarea :name "body" (str body))))
-		       (:tr
-			(:td)
-			(:td
-			 (:input :type "submit" :name "action" :value "add")
-			 (:span :class "separator" " ")
-			 (:input :type "submit"  :name "action"
-				 :value "view"))))))))))
+	     (new-form :id id :title title :body body)))))
