@@ -12,7 +12,7 @@
 	    (:table 
 	     (:tr
 	      (:td "Reset login information")
-	      (:td (:a :href "/reset" "reset")))
+	      (:td (:a :href "reset" "reset")))
 	     (loop
 		for (desc name value) in
 		`(("Blog title" "title" ,(escape-string title)) 

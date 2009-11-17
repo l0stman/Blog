@@ -3,7 +3,7 @@
 (defhand (reset "/reset" &key (user *user*) (msg "Enter the new values:"))
   (w/auth
    (w/html () 
-     (:form :class "config" :method "post" :action "/verify-login"
+     (:form :class "config" :method "post" :action "verify-login"
 	    (:div :class "message" (str msg))
 	    (:table
 	     (:tr

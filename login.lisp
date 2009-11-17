@@ -98,7 +98,7 @@
 			    :default-request-type :post)
     (user msg uri)
   (w/html ()
-    (:form :class "config" :method "post" :action "/verify"
+    (:form :class "config" :method "post" :action "verify"
 	   (:input :type "hidden" :name "uri" :value (or uri (referer)))
 	   (:table
 	    (if msg (htm (:div :class "message" (str msg))))
