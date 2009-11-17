@@ -1,4 +1,5 @@
 This is a simple blog engine on top of Hunchentoot.  The blog is saved
 directly to disk using plaintext file.
 
-admin is both the default username and password.
+After loading successfully the package, visit the uri ``/blog''.  To
+log in, admin is both the default username and password.
