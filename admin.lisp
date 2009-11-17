@@ -1,27 +1,28 @@
 (in-package :blog)
 
-(defun admin (&key
-	      (title *title*)
-	      (maxchar *maxchar*)
-	      (maxpost *maxpost*)
-	      (msg "Enter the new values:"))
+(defhand (admin "/admin" &key
+		(title *title*)
+		(maxchar *maxchar*)
+		(maxpost *maxpost*)
+		(msg "Enter the new values:"))
   (w/auth
       (w/html () 
 	(:div :class "message" (str msg))
 	(:form :id "admin" :method "post" :action "update"
 	       (:table
+		(:tr
+		 (:td "Reset login information")
+		 (:td (:a :href "/reset" "reset")))
 		(loop
-		   for (desc name value type) in
-		   `(("Blog title" "title" ,(escape-string title)) 
-		     ("Username" "username" ,(escape-string user))
-		     ("Password" "password" ,(escape-string pass) "password")
-		     ("Number of characters for post excerpt"
-		      "maxchar" ,maxchar)
-		     ("Number of posts per page" "maxpost" ,maxpost))
+		   for (desc name value) in
+		     `(("Blog title" "title" ,(escape-string title)) 
+		       ("Number of characters for post excerpt"
+			"maxchar" ,maxchar)
+		       ("Number of posts per page" "maxpost" ,maxpost))
 		   do (htm
 		       (:tr
 			(:td (str desc))
-			(:td (:input :type (or type "text")
+			(:td (:input :type "text"
 				     :name name 
 				     :value value)))))
 		(:tr
@@ -29,33 +30,24 @@
 		 (:td
 		  (:input :type "submit" :value "update"))))))))
 
-(push (create-prefix-dispatcher "/admin" 'admin)
-      *dispatch-table*)
-
 (define-easy-handler (update :uri "/update"
 			     :default-request-type :post)
-    (title
-     username
-     password
+    (title 
      (maxchar :parameter-type 'integer)
      (maxpost :parameter-type 'integer))
   (w/auth
-      (cond ((or (string= password "")
-		 (not maxchar)
-		 (not maxpost)
-		 (<= maxchar 0)
-		 (<= maxpost 0))
-	     (admin
-	      :msg "The numbers should be positive and the password non-empty:"
-	      :title title
-	      :maxchar (or maxchar *maxchar*)
-	      :maxpost (or maxpost *maxpost*)))
-	    (t
-	     (setf *title* title
-		   *user* username
-		   *salt* (salt)
-		   *hash* (hash password)
-		   *maxchar* maxchar
-		   *maxpost* maxpost)
-	     (save-blog)
-	     (redirect "/blog")))))
+   (cond ((or (not maxchar)
+	      (not maxpost)
+	      (<= maxchar 0)
+	      (<= maxpost 0))
+	  (admin
+	   :msg "The numbers should be positive:"
+	   :title title
+	   :maxchar (or maxchar *maxchar*)
+	   :maxpost (or maxpost *maxpost*)))
+	 (t
+	  (setf *title* title 
+		*maxchar* maxchar
+		*maxpost* maxpost)
+	  (save-blog)
+	  (redirect "/blog")))))

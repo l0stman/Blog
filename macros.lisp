@@ -23,10 +23,10 @@
   `(with-html-output-to-string (*standard-output* nil)
      ,@body))
 
-(defmacro defhand (name (uri) &body body)
-  "Define a handler for a function without argument."
+(defmacro defhand ((name uri &rest args) &body body)
+  "Define the function name as a handler for the given uri."
   `(progn
-     (defun ,name () ,@body)
+     (defun ,name ,args ,@body)
      (push (create-prefix-dispatcher ,uri ',name)
 	   *dispatch-table*)))
 
