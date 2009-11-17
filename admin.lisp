@@ -6,29 +6,27 @@
 		(maxpost *maxpost*)
 		(msg "Enter the new values:"))
   (w/auth
-      (w/html () 
-	(:div :class "message" (str msg))
-	(:form :id "admin" :method "post" :action "update"
-	       (:table
-		(:tr
-		 (:td "Reset login information")
-		 (:td (:a :href "/reset" "reset")))
-		(loop
-		   for (desc name value) in
-		     `(("Blog title" "title" ,(escape-string title)) 
-		       ("Number of characters for post excerpt"
-			"maxchar" ,maxchar)
-		       ("Number of posts per page" "maxpost" ,maxpost))
-		   do (htm
-		       (:tr
-			(:td (str desc))
-			(:td (:input :type "text"
-				     :name name 
-				     :value value)))))
-		(:tr
-		 (:td)
-		 (:td
-		  (:input :type "submit" :value "update"))))))))
+   (w/html () 
+     (:form :class "config" :method "post" :action "update"
+	    (:div :class "message" (str msg))
+	    (:table 
+	     (:tr
+	      (:td "Reset login information")
+	      (:td (:a :href "/reset" "reset")))
+	     (loop
+		for (desc name value) in
+		`(("Blog title" "title" ,(escape-string title)) 
+		  ("Number of characters for post excerpt"
+		   "maxchar" ,maxchar)
+		  ("Number of posts per page" "maxpost" ,maxpost))
+		do (htm
+		    (:tr
+		     (:td (str desc))
+		     (:td (:input :type "text"
+				  :name name 
+				  :value value))))))
+	    (:div :class "submit"
+		  (:input :type "submit" :value "update"))))))
 
 (define-easy-handler (update :uri "/update"
 			     :default-request-type :post)

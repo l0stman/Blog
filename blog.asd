@@ -16,5 +16,5 @@
 		 (:file "blog" :depends-on ("macros"))
 		 (:file "new" :depends-on ("blog")) 
 		 (:file "admin" :depends-on ("save"))
-		 (:file "change-login" :depends-on ("save"))) 
+		 (:file "change-login" :depends-on ("save" "login"))) 
     :depends-on (:hunchentoot :cl-who :cl-ppcre :ironclad))

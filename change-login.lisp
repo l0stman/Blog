@@ -2,9 +2,9 @@
 
 (defhand (reset "/reset" &key (user *user*) (msg "Enter the new values:"))
   (w/auth
-   (w/html ()
-     (if msg (htm (:div :class "message" (str msg))))
-     (:form :method "post" :action "/verify-login"
+   (w/html () 
+     (:form :class "config" :method "post" :action "/verify-login"
+	    (:div :class "message" (str msg))
 	    (:table
 	     (:tr
 	      (:td "Username")
@@ -14,10 +14,9 @@
 	      (:td (:input :type "password" :name "pass")))
 	     (:tr
 	      (:td "Re-enter the password")
-	      (:td (:input :type "password" :name "pass2")))
-	     (:tr
-	      (:td)
-	      (:td (:input :type "submit" :value "update"))))))))
+	      (:td (:input :type "password" :name "pass2")))) 
+	    (:div :class "submit"
+		  (:input :type "submit" :value "update"))))))
 
 (define-easy-handler (verify-login :uri "/verify-login"
 				:default-request-type :post)

@@ -42,8 +42,6 @@ textarea {
     height: 14em;
 }
 
-form#post input[type=text] { width: 34.3em; }
-form#admin input[type=text], input[type=password] { width: 9em; }
 form.post-edit input[type=submit] {
     border: 0;
     font-weight: bold;
@@ -52,12 +50,15 @@ form.post-edit input[type=submit] {
     color: gray;
 }
 
-table {
-    margin-top:10px; margin-bottom: 10px;
+form.config { width: 53%; }
+.config .submit { text-align: center; }
+.config table {
+    margin-top:10px; margin-bottom: 10px; 
     font-size: smaller;
     padding-left: 1em;
     background-color:#f0f0f0; color: gray;
     border-collapse: collapse;
+    width: 100%;
 }
 
 a { text-decoration: none; }
@@ -72,7 +73,7 @@ div.post {margin-top: 0.5em; }
 .page {
     font-size: 80%;
 }
-a.page, #header a, #title a {
+a.page, #header a, #title a, .config table a{
     text-decoration: none;
     color: #369;
 }
@@ -86,9 +87,10 @@ a.page, #header a, #title a {
     margin: 0em;
 }
 .message {
+    font-size: 110%;
     color: red;
     background-color: pink;
-    width: 21em;
     padding: 5px 10px;
     border: 1px solid red;
 }
+

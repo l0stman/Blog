@@ -13,7 +13,7 @@
 (defun new-form (&key id title body)
   "Form to add or edit a post."
   (w/html ()	  
-    (:form :method "post" :action "new" 
+    (:form :class "config" :method "post" :action "new" 
 	   (when id
 	     (htm (:input :type "hidden" :name "id" :value id))) 
 	   (:div :class "post-title" (str (in-fmt title)))
@@ -27,12 +27,12 @@
 	     (:td "body")
 	     (:td (:textarea :name "body" (str body))))
 	    (:tr
-	     (:td)
-	     (:td
-	      (:input :type "submit" :name "action" :value "add")
-	      (:span :class "separator" " ")
-	      (:input :type "submit"  :name "action"
-		      :value "view")))))))
+	     (:td)))
+	   (:div :class "submit"
+		 (:input :type "submit" :name "action" :value "add")
+		 (:span :class "separator" " ")
+		 (:input :type "submit"  :name "action"
+			 :value "view")))))
 
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)

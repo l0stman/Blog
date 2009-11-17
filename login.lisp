@@ -98,10 +98,10 @@
 			    :default-request-type :post)
     (user msg uri)
   (w/html ()
-    (if msg (htm (:div :class "message" (str msg))))
-    (:form :method "post" :action "/verify"
+    (:form :class "config" :method "post" :action "/verify"
 	   (:input :type "hidden" :name "uri" :value (or uri (referer)))
 	   (:table
+	    (if msg (htm (:div :class "message" (str msg))))
 	    (:tr
 	     (:td "username")
 	     (:td (:input :type "text" :name "user" :value user)))
@@ -110,4 +110,5 @@
 	     (:td (:input :type "password" :name "pass")))
 	    (:tr
 	     (:td)
-	     (:td (:input :type "submit" :value "login")))))))
+	     (:td)))
+	   (:div :class "submit" (:input :type "submit" :value "login")))))
