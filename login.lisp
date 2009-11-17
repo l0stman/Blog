@@ -53,18 +53,24 @@
 	 (values (subseq c 0 p)
 		 (sto (subseq c (1+ p)))))))
 
+(defvar *ck-name* "t"
+  "Name of the cookie for authentication.")
+
+(proclaim '(inline update-cookie))
+(defun update-cookie ()
+  (set-cookie *ck-name* :value (encode-cookie)))
+
 (defhand logout ("/logout")
-  (set-cookie "t" :expires (1- (get-universal-time)))
+  (set-cookie *ck-name* :expires (1- (get-universal-time)))
   (redirect (referer)))
 
 (defun loggedp ()
-  "Verify if the client is logged in."
-  (aif (cookie-in "t")
+  "Verify if the client is logged in and update its cookie."
+  (aif (cookie-in *ck-name*)
     (multiple-value-bind (time digest) (decode-cookie it) 
       (and time
-	   (if (expiredp time)
-	       (progn (logout) nil)
-	       (trustedp time digest))))))
+	   (cond ((expiredp time) (logout) nil)
+		 ((trustedp time digest) (update-cookie) t))))))
 
 (proclaim '(inline salt))
 (defun salt () (random-octets 5))

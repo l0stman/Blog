@@ -8,5 +8,5 @@
 	((not (equalp (hash pass) *hash*))
 	 (login :user user :msg "Invalid password." :uri uri))
 	(t
-	 (set-cookie "t" :value (encode-cookie))
+	 (update-cookie)
 	 (redirect uri))))
