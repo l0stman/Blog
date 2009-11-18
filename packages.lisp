@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
 (defpackage :blog
-  (:use hunchentoot :cl-who :cl :md5 :cl-ppcre)
+  (:use :hunchentoot :cl-who :cl :cl-ppcre)
   (:import-from :ironclad
 		:make-hmac
 		:update-hmac
