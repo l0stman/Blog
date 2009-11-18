@@ -3,7 +3,7 @@
 (defhand (reset "/reset" &key (user *user*) (msg "Enter the new values:"))
   (w/auth
    (w/html () 
-     (:form :class "config" :method "post" :action "verify-login"
+     (:form :class "config" :method "post" :action "change-login"
 	    (:div :class "message" (str msg))
 	    (:table
 	     (:tr
@@ -18,7 +18,7 @@
 	    (:div :class "submit"
 		  (:input :type "submit" :value "update"))))))
 
-(define-easy-handler (verify-login :uri "/verify-login"
+(define-easy-handler (change-login :uri "/change-login"
 				:default-request-type :post)
     (user pass pass2)
   (w/auth
