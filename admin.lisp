@@ -16,7 +16,7 @@
 	     (loop
 		for (desc name value) in
 		`(("Blog title" "title" ,(escape-string title)) 
-		  ("Number of characters for post excerpt"
+		  ("Number of characters for a post excerpt"
 		   "maxchar" ,maxchar)
 		  ("Number of posts per page" "maxpost" ,maxpost))
 		do (htm

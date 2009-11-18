@@ -10,6 +10,18 @@
   (save-blog)
   (redirect "/blog"))
 
+(defun fmt-help ()
+  "Text formatting help."
+  (html/s 
+    (:table 
+     (:tr (:td "_emphasize_") (:td (:em "emphasize")))
+     (:tr (:td "*strong*") (:td (:strong "strong")))
+     (:tr (:td "> blockquote") (:td (:blockquote "blockquote")))
+     (:tr
+      (:td "[google](http://www.google.com)")
+      (:td (:a :href "http://www.google.com" "google")))
+     (:tr (:td "foo -- bar") (:td "foo &mdash; bar")))))
+
 (defun new-form (&key id title body)
   "Form to add or edit a post."
   (w/html ()	  
@@ -32,7 +44,8 @@
 		 (:input :type "submit" :name "action" :value "add")
 		 (:span :class "separator" " ")
 		 (:input :type "submit"  :name "action"
-			 :value "view")))))
+			 :value "view"))
+	   (str (fmt-help)))))
 
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
