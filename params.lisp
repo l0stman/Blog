@@ -21,16 +21,13 @@
 (defclass post ()
   ((title
     :initarg :title
-    :reader title
-    :writer (setf title))
+    :accessor title)
    (body
     :initarg :body
-    :reader body
-    :writer (setf body))
+    :accessor body)
    (stub
     :initarg :stub
-    :reader stub
-    :writer (setf stub))
+    :accessor stub)
    (id
     :initarg :id
     :reader id
