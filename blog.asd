@@ -7,14 +7,14 @@
     :description "a simple blog engine."
     :author "rrl <endian.sign@gmail.com>"
     :components ((:file "packages")
+		 (:file "macros" :depends-on ("packages"))
 		 (:file "fmt" :depends-on ("packages"))
 		 (:file "login" :depends-on ("macros"))
 		 (:file "verify" :depends-on ("login")) 
 		 (:file "params" :depends-on ("fmt")) 
-		 (:file "save" :depends-on ("params"))
-		 (:file "macros" :depends-on ("save")) 
-		 (:file "blog" :depends-on ("macros"))
+		 (:file "save" :depends-on ("params" "login")) 
+		 (:file "blog" :depends-on ("login" "params"))
 		 (:file "new" :depends-on ("blog")) 
 		 (:file "admin" :depends-on ("save"))
-		 (:file "change-login" :depends-on ("save" "login"))) 
+		 (:file "change-login" :depends-on ("save"))) 
     :depends-on (:hunchentoot :cl-who :cl-ppcre :ironclad))
