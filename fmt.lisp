@@ -1,6 +1,7 @@
 (in-package :blog)
 
 (defmacro deffmt (name (s &key start end) &body body)
+  "Apply a regex based transformation to the string."
   (flet ((call (fn) `(,s ,(if fn `(,fn ,s) s))))
    `(defun ,name (,s)
       (let*
@@ -12,15 +13,16 @@
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
+;; Transform the ascii string to html by escaping characters.
 (deffmt in-fmt (s :start escape-string)
   ("(^(\\r\\n)?|(\\r\\n){2,})&gt;((.|\\s)*?)((\\r\\n){2,}|$)"
    (list "<blockquote>"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
-	     (regex-replace-all "&gt;" (fourth regs) ""))
+	     (regex-replace-all "\\r\\n&gt;" (fourth regs) "<br>"))
 	 "</blockquote>")
    :simple-calls t)
-  ("(\\r\\n){2,}" "<p>")
+  ("(\\r\\n){2,}" "<p>") 
   ("\\*([^*]*)(\\*|$)" "<strong>\\1</strong>")
   ("_([^_]*)(_|$)" "<em>\\1</em>")
   ("\\[([^]]+)\\]\\(([^)]+)(\\)|$)" "<a href=\"\\2\">\\1</a>")
@@ -35,13 +37,16 @@
 	(format nil "~a" (code-char (read-from-string (subseq r1 n))))))
    :simple-calls t))
 
+;; Transform back the html string to ascii and unescape special characters.
 (deffmt out-fmt (s :end unesc)
-  ("<p>" *ret*)
+  ("<p>" *ret*) 
   ("<blockquote>((.|\\s)*?)</blockquote>" 
    (list *ret* ">"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
-	     (regex-replace-all "(?<=\\r\\n)" (first regs) ">"))
+	     (regex-replace-all "<br>"
+				(first regs)
+				(coerce '(#\return #\newline #\>) 'string)))
 	 *ret*)
    :simple-calls t)
   ("</?strong>" "*")
