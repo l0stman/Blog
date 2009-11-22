@@ -107,8 +107,5 @@
 	     (:td (:input :type "text" :name "user" :value user)))
 	    (:tr
 	     (:td "password")
-	     (:td (:input :type "password" :name "pass")))
-	    (:tr
-	     (:td)
-	     (:td)))
+	     (:td (:input :type "password" :name "pass"))))
 	   (:div :class "submit" (:input :type "submit" :value "login")))))
