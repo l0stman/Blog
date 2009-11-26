@@ -39,12 +39,13 @@
       (str (header log-p))
       (labels ((find-from (id)
 		 (and (> id 0)
-		      (aif (find-post id) it (find-post (1- id)))))
+		      (aif (find-post id) it (find-from (1- id)))))
 	       (link (pred page msg)
 		 (html/s
 		   (when pred
 		     (htm (:a :class "page"
-			      :href (fmt "blog?page=~a" page) msg))))))
+			      :href (conc "blog?page=" (write-to-string page))
+			      (str msg)))))))
 	(loop
 	   with skip = (* (1- page) *maxpost*) 
 	   with id = *id* 
@@ -61,7 +62,7 @@
 	   finally (let ((pp (> page 1))
 			 (pn (and (= count *maxpost*) (find-from id)))) 
 		     (str (link pp (1- page) "prev"))
-		     (htm (:span :class "separator" (str (when (and pp pn) "|"))))
+		     (when (and pp pn) (htm (:span :class "separator" "|")))
 		     (str (link pn (1+ page) "next"))))))))
 
 (define-easy-handler (view-post :uri "/view"
