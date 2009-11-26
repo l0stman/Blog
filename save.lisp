@@ -23,21 +23,19 @@
 		       :direction :output
 		       :if-exists :supersede)
     (with-standard-io-syntax
-      (let ((*package* (find-package :blog)))
-	(let ((*print-readably* nil))
-	  (format out "#.(progn ~{(setq ~s ~s)~^ ~})"
-		  (loop for sym in *params*
-		     append `(,sym ,(symbol-value sym)))))
-	(let ((*print-readably* t))
-	  (print *blog* out))))))
+      (let ((*package* (find-package :blog))
+	    (*print-readably* t)) 
+	(format out "#.(progn ~{(setq ~s ~s)~^ ~})"
+		(loop for sym in *params*
+		   append `(,sym ,(symbol-value sym))))
+	(print *blog* out)))))
 
 (defun load-blog ()
   (with-open-file (in *db*)
     (with-standard-io-syntax
       (let* ((*package* (find-package :blog)))
 	(read in)
-	(dolist (post (read in))
-	  (setf (gethash (id post) *blog*) post))))))
+	(setq *blog* (read in))))))
 
 
 (when (probe-file *db*)
