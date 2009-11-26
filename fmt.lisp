@@ -2,14 +2,14 @@
 
 (defmacro deffmt (name (s &key start end) &body body)
   "Apply a regex based transformation to the string."
-  (flet ((call (fn) `(,s ,(if fn `(,fn ,s) s))))
-   `(defun ,name (,s)
-      (let*
-	  (,(call start)
-	   ,@(loop for p in body collect
-		  `(,s (regex-replace-all ,(first p) ,s ,@(cdr p))))
-	    ,(call end)) 
-	s))))
+  (flet ((call (fn) (if fn `((,s (,fn ,s))))))
+    `(defun ,name (,s)
+       (let*
+	   (,@(call start)
+	    ,@(loop for p in body collect
+		   `(,s (regex-replace-all ,(first p) ,s ,@(cdr p))))
+	      ,@(call end)) 
+	 s))))
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
