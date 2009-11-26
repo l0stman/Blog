@@ -53,6 +53,7 @@
   (w/auth
       (cond ((string= action "delete")
 	     (delete-post id)
+	     (save-blog)
 	     (redirect "/blog"))
 	    ((string= action "add") (add-post id title body)) 
 	    (t

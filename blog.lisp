@@ -30,30 +30,39 @@
 	       (:a :href "login" "login"))))
     (:div :id "title" (:a :href "blog" (str *title*)))))
 
-(defmacro link (pred page msg)
-  `(html/s
-     (when ,pred
-      (htm
-       (:a :class "page"
-	   :href (conc "blog?page=" (write-to-string ,page)) ,msg)))))
-
 (define-easy-handler (blog :uri "/blog"
 			   :default-request-type :get)
     ((page :parameter-type 'integer))
-  (let* ((page (if (and page (> page 0)) page 1))
-	 (blog (nthcdr (* (1- page) *maxpost*) *blog*))
-	 (log-p (loggedp))) 
+  (let ((page (if (and page (> page 0)) page 1)) 
+	(log-p (loggedp))) 
     (w/html () 
       (str (header log-p))
-      (loop repeat *maxpost*
-	 for post in blog
-	 for rest on blog
-	 do (str (show post log-p :limit-p t))
-	 finally (let ((pp (> page 1))
-		       (pn (and rest (cdr rest))))
-		   (str (link pp (1- page) "prev"))
-		   (htm (:span :class "separator" (str (when (and pp pn) "|"))))
-		   (str (link pn (1+ page) "next")))))))
+      (labels ((find-from (id)
+		 (and (> id 0)
+		      (aif (find-post id) it (find-post (1- id)))))
+	       (link (pred page msg)
+		 (html/s
+		   (when pred
+		     (htm (:a :class "page"
+			      :href (fmt "blog?page=~a" page) msg))))))
+	(loop
+	   with skip = (* (1- page) *maxpost*) 
+	   with id = *id* 
+	   with count = 0
+	   while (and (< count *maxpost*) (< 0 id))
+	   do (let ((post (find-from id)))
+		(cond (post
+		       (setf id (1- (id post)))
+		       (cond ((zerop skip)
+			      (str (show post log-p :limit-p t))
+			      (incf count))
+			     (t (decf skip))))
+		      (t (decf id))))
+	   finally (let ((pp (> page 1))
+			 (pn (and (= count *maxpost*) (find-from id)))) 
+		     (str (link pp (1- page) "prev"))
+		     (htm (:span :class "separator" (str (when (and pp pn) "|"))))
+		     (str (link pn (1+ page) "next"))))))))
 
 (define-easy-handler (view-post :uri "/view"
 				:default-request-type :get)
