@@ -36,7 +36,8 @@
     (with-standard-io-syntax
       (let* ((*package* (find-package :blog)))
 	(read in)
-	(setq *blog* (read in))))))
+	(dolist (post (read in))
+	  (setf (gethash (id post) *blog*) post))))))
 
 
 (when (probe-file *db*)

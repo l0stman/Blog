@@ -1,6 +1,6 @@
 (in-package :blog)
 
-(defvar *blog* nil)
+(defvar *blog* (make-hash-table))
 (defvar *title* "A Blog")
 (defvar *id* 0)
 (defvar *maxchar* 320)
@@ -53,10 +53,10 @@
   nil)
 
 (defun ins-post (title body)
-  (push (make-post title body) *blog*))
+  (let ((p (make-post title body)))
+    (setf (gethash (id p) *blog*) p)))
 
-(defun find-post (id)
-  (find-if #'(lambda (p) (= (id p) id)) *blog*))
+(defun find-post (id) (gethash id *blog*))
 
 (defun edit-post (id title body)
   (let ((p (find-post id)))
@@ -66,13 +66,4 @@
 		 (stub p) (in-fmt (excerpt body))))
 	  (t (blog-error)))))
 
-(defun delete-post (id)
-  (flet ((id= (p) (= id (id p))))
-    (labels ((drop (posts)
-	       (cond ((null (cdr posts)) nil)
-		     ((id= (cadr posts))
-		      (setf (cdr posts) (cddr posts)))
-		     (t (drop (cdr posts))))))
-      (cond ((null *blog*) nil)
-	    ((id= (car *blog*)) (setq *blog* (cdr *blog*)))
-	    (t (drop *blog*))))))
+(defun delete-post (id) (remhash id *blog*))
