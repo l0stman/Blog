@@ -38,3 +38,8 @@
 (defmacro aif (pred &body body)
   `(let ((it ,pred))
      (if it ,@body)))
+
+(defmacro when-bind ((var expr) &body body)
+  `(let ((,var ,expr))
+     (when ,var
+       ,@body)))

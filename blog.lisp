@@ -41,19 +41,24 @@
 			   :default-request-type :get)
     ((page :parameter-type 'integer))
   (let* ((page (if (and page (> page 0)) page 1))
-	 (blog (nthcdr (* (1- page) *maxpost*) *blog*))
+	 (maxid (- *id* (* (1- page) *maxpost*)))
 	 (log-p (loggedp))) 
     (w/html () 
       (str (header log-p))
-      (loop repeat *maxpost*
-	 for post in blog
-	 for rest on blog
-	 do (str (show post log-p :limit-p t))
-	 finally (let ((pp (> page 1))
-		       (pn (and rest (cdr rest))))
-		   (str (link pp (1- page) "prev"))
-		   (htm (:span :class "separator" (str (when (and pp pn) "|"))))
-		   (str (link pn (1+ page) "next")))))))
+      (labels ((find-from (id)
+		 (and (> id 0)
+		      (aif (find-post id) it (find-post (1- id))))))
+	(loop for id from maxid downto 1
+	   with count = 0
+	   while (< count *maxpost*)
+	   do (when-bind (post (find-from id))
+		(incf count)
+		(str (show post log-p :limit-p t)))
+	   finally (let ((pp (> page 1))
+			 (pn (and (= count *maxpost*) (find-from id)))) 
+		     (str (link pp (1- page) "prev"))
+		     (htm (:span :class "separator" (str (when (and pp pn) "|"))))
+		     (str (link pn (1+ page) "next"))))))))
 
 (define-easy-handler (view-post :uri "/view"
 				:default-request-type :get)
