@@ -20,7 +20,7 @@
 
 (defvar *secret-key* (random-octets 32))
 
-(proclaim '(inline digest trustedp loggedp expiredp))
+(declaim (inline digest trustedp loggedp expiredp))
 
 (defun digest (data)
   "Compute the digest of the string data."
@@ -56,7 +56,7 @@
 (defvar *ck-name* "t"
   "Name of the cookie for authentication.")
 
-(proclaim '(inline update-cookie))
+(declaim (inline update-cookie))
 (defun update-cookie ()
   (set-cookie *ck-name* :value (encode-cookie)))
 
@@ -72,7 +72,7 @@
 	   (cond ((expiredp time) (logout) nil)
 		 ((trustedp time digest) (update-cookie) t))))))
 
-(proclaim '(inline salt))
+(declaim (inline salt))
 (defun salt () (random-octets 5))
 
 (defvar *salt* (salt))
