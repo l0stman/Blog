@@ -69,8 +69,9 @@
   (aif (cookie-in *ck-name*)
     (multiple-value-bind (time digest) (decode-cookie it) 
       (and time
+	   (trustedp time)
 	   (cond ((expiredp time) (logout) nil)
-		 ((trustedp time digest) (update-cookie) t))))))
+		 (t (update-cookie) t))))))
 
 (declaim (inline salt))
 (defun salt () (random-octets 5))
