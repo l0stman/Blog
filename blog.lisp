@@ -3,20 +3,18 @@
 (defun show (post logged-p &key limit-p)
   "Show a post with an optional character limit defined by *maxchar*."
   (html/s
-    (:div :class "post"
-	  (:a :href
-	      (conc "view?id=" (write-to-string (id post)))
-	      (:span :class "post-title" (str (title post))))
-	  (:div :class "post-date" (str (date post)))
-	  (:div :class "post-body" (str (if limit-p (stub post) (body post))))
-	  (if logged-p
-	      (htm
-	       (:form :method "post"
-		      :action "new"
-		      :class "post-edit"
-		      (:input :type "hidden" :name "id" :value (id post))
-		      (:input :type "submit" :name "action" :value "edit")
-		      (:input :type "submit" :name "action" :value "delete")))))))
+   (:div :class "post"
+	 (:a :href
+	     (conc "view?id=" (write-to-string (id post)))
+	     (:span :class "post-title" (str (title post))))
+	 (:div :class "post-date" (str (date post)))
+	 (:div :class "post-body" (str (if limit-p (stub post) (body post))))
+	 (when logged-p
+	   (htm
+	    (:form :method "post" :action "new" :class "post-edit"
+		   (:input :type "hidden" :name "id" :value (id post))
+		   (:input :type "submit" :name "action" :value "edit")
+		   (:input :type "submit" :name "action" :value "delete")))))))
 
 (defun header (log-p)
   (html/s
