@@ -69,7 +69,7 @@
   (aif (cookie-in *ck-name*)
     (multiple-value-bind (time digest) (decode-cookie it) 
       (and time
-	   (trustedp time)
+	   (trustedp time digest)
 	   (cond ((expiredp time) (logout) nil)
 		 (t (update-cookie) t))))))
 
