@@ -35,9 +35,9 @@
 		 args)
      ,@body))
 
-(defmacro aif (pred &body body)
+(defmacro aif (pred then &optional else)
   `(let ((it ,pred))
-     (if it ,@body)))
+     (if it ,then ,else)))
 
 (defmacro when-bind ((var expr) &body body)
   `(let ((,var ,expr))
