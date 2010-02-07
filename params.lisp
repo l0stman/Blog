@@ -59,11 +59,10 @@
 (defun find-post (id) (gethash id *blog*))
 
 (defun edit-post (id title body)
-  (let ((p (find-post id)))
-    (cond (p  
-	   (setf (title p) title
-		 (body p) (in-fmt body)
-		 (stub p) (in-fmt (excerpt body))))
-	  (t (blog-error)))))
+  (aif (find-post id)
+       (setf (title it) title
+             (body it) (in-fmt body)
+             (stub it) (in-fmt (excerpt body)))
+       (blog-error)))
 
 (defun delete-post (id) (remhash id *blog*))
