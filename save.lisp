@@ -25,11 +25,16 @@
     (with-standard-io-syntax
       (let ((*package* (find-package :blog)))
 	(let ((*print-readably* nil))
-	  (format out "#.(progn ~{(setq ~s ~s)~^ ~})"
-		  (loop for sym in *params*
-		     append `(,sym ,(symbol-value sym)))))
+          (flet ((to-octets (obj)
+                   `(coerce ,obj '(simple-array (unsigned-byte 8) (*)))))
+            (format out "#.~S"
+                    `(setq
+                      ,@(loop for sym in *params* append
+                             `(,sym ,(if (eq sym '*salt*)
+                                         (to-octets (symbol-value sym))
+                                         (symbol-value sym))))))))
 	(let ((*print-readably* t))
-	 (print *blog* out))))))
+          (print *blog* out))))))
 
 (defun load-blog ()
   (with-open-file (in *db*)

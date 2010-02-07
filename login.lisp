@@ -74,7 +74,7 @@
 		 (t (update-cookie) t))))))
 
 (declaim (inline salt))
-(defun salt () (random-octets 5))
+(defun salt () (random-octets 8))
 
 (defvar *salt* (salt))
 
