@@ -2,8 +2,8 @@
 
 (defmacro w/octets (size i val)
   "Return an array of octets of the given size whose i-th element is val."
-  (w/syms (a len) 
-    `(let* ((,len ,size) 
+  (w/syms (a len)
+    `(let* ((,len ,size)
 	    (,a (make-array ,len :element-type '(unsigned-byte 8))))
        (dotimes (,i ,len)
 	 (setf (aref ,a ,i) ,val))
@@ -24,7 +24,7 @@
 
 (defun digest (data)
   "Compute the digest of the string data."
-  (let ((hmac (make-hmac *secret-key* :sha256))) 
+  (let ((hmac (make-hmac *secret-key* :sha256)))
     (update-hmac hmac (sto data))
     (hmac-digest hmac)))
 
@@ -67,24 +67,21 @@
 (defun loggedp ()
   "Verify if the client is logged in and update its cookie."
   (aif (cookie-in *ck-name*)
-    (multiple-value-bind (time digest) (decode-cookie it) 
+    (multiple-value-bind (time digest) (decode-cookie it)
       (and time
 	   (trustedp time digest)
 	   (cond ((expiredp time) (logout) nil)
 		 (t (update-cookie) t))))))
 
-(declaim (inline salt))
+(declaim (inline salt hash))
 (defun salt () (random-octets 8))
 
 (defvar *salt* (salt))
+(defvar *kdf* (make-kdf 'ironclad:pbkdf2 :digest 'ironclad:sha1))
 
 (defun hash (pass)
-  "Compute the password digest using SHA1."
-  (digest-sequence
-   :sha1
-   (concatenate '(simple-array (unsigned-byte 8) (*))
-		*salt*
-		(sto pass))))
+  "Compute the password digest using PBKDF2."
+  (derive-key *kdf* (sto pass) *salt* 10000 20))
 
 (defvar *user* "admin")
 (defvar *hash* (hash "admin"))
