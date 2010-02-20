@@ -2,7 +2,7 @@
 
 (defun show (post logged-p &key limit-p)
   "Show a post with an optional character limit defined by *maxchar*."
-  (html/s
+  (html/s ()
    (:div :class "post"
 	 (:a :href
 	     (conc "view?id=" (write-to-string (id post)))
@@ -17,7 +17,7 @@
 		   (:input :type "submit" :name "action" :value "delete")))))))
 
 (defun header (log-p)
-  (html/s
+  (html/s ()
     (:div :id "header"
 	  (if log-p
 	      (htm
@@ -39,7 +39,7 @@
 		 (and (> id 0)
 		      (aif (find-post id) it (find-from (1- id)))))
 	       (link (pred page msg)
-		 (html/s
+		 (html/s ()
 		   (when pred
 		     (htm (:a :class "page"
 			      :href (conc "blog?page=" (write-to-string page))

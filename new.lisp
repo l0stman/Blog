@@ -12,7 +12,7 @@
 
 (defun fmt-help ()
   "Text formatting help."
-  (html/s 
+  (html/s ()
     (:table 
      (:tr (:td "_emphasize_") (:td (:em "emphasize")))
      (:tr (:td "*strong*") (:td (:strong "strong")))
