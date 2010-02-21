@@ -19,12 +19,10 @@ directly accessible to the outside world.")
              (:description (str *rss-description*))
              (:docs "http://blogs.law.harvard.edu/tech/press")
              (loop repeat *maxfeed*
-                with id = *id*
-                while (> id 0)
-                do (when-bind (post (find-from id))
-                     (htm
-                      (:item
-                       (:title (str (title post)))
-                       (:link (fmt "~A/view?id=~D" url id))
-                       (:description (esc (stub post)))))
-                     (setf id (1- (id post))))))))))
+                for post = (find-from *id*) then (find-from (1- (id post)))
+                while post
+                do (htm
+                    (:item
+                     (:title (str (title post)))
+                     (:link (fmt "~A/view?id=~D" url (id post)))
+                     (:description (esc (stub post)))))))))))
