@@ -25,6 +25,7 @@
 	       (:a :href "admin" "admin") (:span :class "separator" "|")
 	       (:a :href "logout" "logout"))
 	      (htm
+               (:a :href "feed" "rss") (:span :class "separator" "|")
 	       (:a :href "login" "login"))))
     (:div :id "title" (:a :href "blog" (str *title*)))))
 
