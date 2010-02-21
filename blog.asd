@@ -9,7 +9,7 @@
     :components ((:file "packages")
                  (:file "macros" :depends-on ("packages"))
 		 (:file "fmt" :depends-on ("packages"))
-		 (:file "params" :depends-on ("fmt"))
+		 (:file "params" :depends-on ("fmt" "macros"))
 		 (:file "login" :depends-on ("macros"))
 		 (:file "verify" :depends-on ("login"))
 		 (:file "save" :depends-on ("login" "params"))
