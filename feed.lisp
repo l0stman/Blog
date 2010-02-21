@@ -26,5 +26,5 @@ directly accessible to the outside world.")
                       (:item
                        (:title (str (title post)))
                        (:link (fmt "~A/view?id=~D" url id))
-                       (:description (str (stub post)))))
+                       (:description (esc (stub post)))))
                      (setf id (1- (id post))))))))))
