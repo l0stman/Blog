@@ -35,15 +35,12 @@
 	(log-p (loggedp)))
     (w/html ()
       (str (header log-p))
-      (labels ((find-from (id)
-		 (and (> id 0)
-		      (aif (find-post id) it (find-from (1- id)))))
-	       (link (pred page msg)
-		 (html/s ()
-		   (when pred
-		     (htm (:a :class "page"
-			      :href (conc "blog?page=" (write-to-string page))
-			      (str msg)))))))
+      (flet ((link (pred page msg)
+               (html/s ()
+                 (when pred
+                   (htm (:a :class "page"
+                            :href (conc "blog?page=" (write-to-string page))
+                            (str msg)))))))
 	(loop
 	   with skip = (* (1- page) *maxpost*)
 	   with id = *id*
