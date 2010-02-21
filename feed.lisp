@@ -9,20 +9,23 @@ directly accessible to the outside world.")
 
 (defvar *rss-description* "RSS feed")
 
+(declaim (inline htoot-url))
+(defun htoot-url ()
+  (or *htoot-url* (format nil "http://~A" (host))))
+
 (defhand (feed "/feed")
-  (let ((url (or *htoot-url* (format nil "http://~A" (host)))))
-    (html/s (:prologue "<?xml version=\"1.0\"?>")
-      (:rss :version "2.0"
-            (:channel
-             (:title (str *title*))
-             (:link (conc url "/blog"))
-             (:description (str *rss-description*))
-             (:docs "http://blogs.law.harvard.edu/tech/press")
-             (loop repeat *maxfeed*
-                for post = (find-from *id*) then (find-from (1- (id post)))
-                while post
-                do (htm
-                    (:item
-                     (:title (str (title post)))
-                     (:link (fmt "~A/view?id=~D" url (id post)))
-                     (:description (esc (stub post)))))))))))
+  (html/s (:prologue "<?xml version=\"1.0\"?>")
+    (:rss :version "2.0"
+          (:channel
+           (:title (str *title*))
+           (:link (fmt "~A/~A" (htoot-url) "blog"))
+           (:description (str *rss-description*))
+           (:docs "http://blogs.law.harvard.edu/tech/press")
+           (loop repeat *maxfeed*
+              for post = (find-from *id*) then (find-from (1- (id post)))
+              while post
+              do (htm
+                  (:item
+                   (:title (str (title post)))
+                   (:link (fmt "~A/view?id=~D" (htoot-url) (id post)))
+                   (:description (esc (stub post))))))))))
