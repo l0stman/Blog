@@ -16,7 +16,8 @@
       (call-next-method)))
 
 (defparameter *params*
-  '(*title* *id* *maxchar* *maxpost* *user* *salt* *hash*))
+  '(*title* *id* *maxchar* *maxpost* *user* *salt* *hash* *htoot-url*
+    *maxfeed* *rss-description*))
 
 (defun save-blog ()
   (with-open-file (out (ensure-directories-exist *db*)

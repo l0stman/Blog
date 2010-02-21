@@ -58,6 +58,10 @@
 
 (defun find-post (id) (gethash id *blog*))
 
+(defun find-from (n)
+  (and (> n 0)
+       (aif (find-post n) it (find-from (1- n)))))
+
 (defun edit-post (id title body)
   (aif (find-post id)
        (setf (title it) title

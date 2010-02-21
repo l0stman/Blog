@@ -18,9 +18,9 @@
       (:link :rel "stylesheet" :type "text/css" :href "blog.css")
       (:body ,@body))))
 
-(defmacro html/s (&body body)
+(defmacro html/s ((&key prologue) &body body)
   "Write the html strings to the standard output."
-  `(with-html-output-to-string (*standard-output* nil)
+  `(with-html-output-to-string (*standard-output* nil :prologue ,prologue)
      ,@body))
 
 (defmacro defhand ((name uri &rest args) &body body)
