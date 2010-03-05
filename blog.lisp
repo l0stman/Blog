@@ -58,11 +58,11 @@
 		     (str (link pn (1+ page) "next"))))))))
 
 (define-easy-handler (view-post :uri "/view"
-				:default-request-type :get)
+                                :default-request-type :get)
     ((id :parameter-type 'integer))
-  (let ((p (find-post id)))
-    (cond ((not p) (blog-error))
-	  (t (let ((log-p (loggedp)))
-	       (w/html (:title (title p))
-		 (str (header log-p))
-		 (str (show p log-p))))))))
+  (aif (find-post id)
+       (let ((log-p (loggedp)))
+         (w/html (:title (title it))
+           (str (header log-p))
+           (str (show it log-p))))
+       (blog-error)))
