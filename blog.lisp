@@ -27,7 +27,7 @@
 	      (htm
                (:a :href "feed" "rss") (:span :class "separator" "|")
 	       (:a :href "login" "login"))))
-    (:div :id "title" (:a :href "blog" (str *title*)))))
+    (:div :id "title" (:a :href "blog" (esc *title*)))))
 
 (define-easy-handler (blog :uri "/blog"
 			   :default-request-type :get)

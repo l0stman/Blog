@@ -14,7 +14,7 @@
   "Write html code to the standard output with a header."
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      (:html
-      (:head (:title (str (or ,title *title*))))
+      (:head (:title (esc (or ,title *title*))))
       (:link :rel "stylesheet" :type "text/css" :href "blog.css")
       (:body ,@body))))
 
