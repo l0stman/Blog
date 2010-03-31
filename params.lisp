@@ -1,5 +1,7 @@
 (in-package :blog)
 
+(deffold "/static/" "static")
+
 (defvar *blog* (make-hash-table))
 (defvar *title* "A Blog")
 (defvar *id* 0)
