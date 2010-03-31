@@ -19,21 +19,24 @@ blockquote {
     margin: 5px;
     margin-right: 15px;
 }
-div#header {
-    text-align: right;
+
+#header-left { float: left; }
+#header-right { text-align: right; }
+#header-left img {
+    vertical-align: middle;
+    margin: 0px 0.6ex 0px 0ex;
 }
+
 
 div#title {
     text-align: center;
     font-family:normal x-small verdana, arial, helvetica, sans-serif;
     font-weight: bold;
-    font-size: 200%;
+    font-size: 250%;
     border: 1px solid #5f99cf;
     background-color: #cee3f8;
-    /*
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
-    */
 }
 
 textarea {

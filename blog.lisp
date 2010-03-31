@@ -19,14 +19,17 @@
 (defun header (log-p)
   (html/s ()
     (:div :id "header"
-	  (if log-p
-	      (htm
-	       (:a :href "new" "new") (:span :class "separator" "|")
-	       (:a :href "admin" "admin") (:span :class "separator" "|")
-	       (:a :href "logout" "logout"))
-	      (htm
-               (:a :href "feed" "rss") (:span :class "separator" "|")
-	       (:a :href "login" "login"))))
+          (:div :id "header-left"
+                (:img :src "static/feed-icon-14x14.png" :alt "[feed icon]")
+                (:a :href "feed" "rss"))
+          (:div :id "header-right"
+           (if log-p
+               (htm
+                (:a :href "new" "new") (:span :class "separator" "|")
+                (:a :href "admin" "admin") (:span :class "separator" "|")
+                (:a :href "logout" "logout"))
+               (htm
+                (:a :href "login" "login")))))
     (:div :id "title" (:a :href "blog" (esc *title*)))))
 
 (define-easy-handler (blog :uri "/blog"
