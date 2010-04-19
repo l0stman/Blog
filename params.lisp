@@ -8,18 +8,6 @@
 (defvar *maxchar* 320)
 (defvar *maxpost* 10)
 
-(defun sys-time ()
-    (multiple-value-bind
-	  (second minute hour date month year) (get-decoded-time)
-      (format nil
-	      "~2,'0d/~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d"
-	      date
-	      month
-	      year
-	      hour
-	      minute
-	      second)))
-
 (defclass post ()
   ((title
     :initarg :title
@@ -37,7 +25,19 @@
    (date
     :initarg :date
     :reader date
-    :initform (sys-time))))
+    :initform (get-universal-time))))
+
+(defun sys-time (ut)
+    (multiple-value-bind
+	  (second minute hour date month year) (decode-universal-time ut)
+      (format nil
+	      "~2,'0d/~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d"
+	      date
+	      month
+	      year
+	      hour
+	      minute
+	      second)))
 
 (defun make-post (title body)
   (make-instance 'post

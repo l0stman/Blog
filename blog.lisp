@@ -7,7 +7,7 @@
 	 (:a :href
 	     (conc "view?id=" (write-to-string (id post)))
 	     (:span :class "post-title" (str (title post))))
-	 (:div :class "post-date" (str (date post)))
+	 (:div :class "post-date" (str (sys-time (date post))))
 	 (:div :class "post-body" (str (if limit-p (stub post) (body post))))
 	 (when logged-p
 	   (htm
