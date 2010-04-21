@@ -1,22 +1,15 @@
 (in-package :blog)
 
-(defmacro w/octets (size i val)
-  "Return an array of octets of the given size whose i-th element is val."
-  (w/syms (a len)
-    `(let* ((,len ,size)
-	    (,a (make-array ,len :element-type '(unsigned-byte 8))))
-       (dotimes (,i ,len)
-	 (setf (aref ,a ,i) ,val))
-       ,a)))
-
 (defun sto (s)
   "Transform a string to an array of octets."
-  (w/octets (length s) i (char-code (aref s i))))
+  (map '(simple-array (unsigned-byte 8) (*)) #'char-code s))
 
 (defun random-octets (size)
   "Return random octets of the given size"
   (with-open-file (in "/dev/urandom" :element-type '(unsigned-byte 8))
-    (w/octets size i (read-byte in))))
+    (let ((a (make-array size :element-type '(unsigned-byte 8))))
+      (dotimes (i size a)
+        (setf (aref a i) (read-byte in))))))
 
 (defvar *secret-key* (random-octets 32))
 
