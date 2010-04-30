@@ -3,7 +3,6 @@
 (deffold "/static/" "static")
 
 (defvar *blog* (make-hash-table))
-(defvar *title* "A Blog")
 (defvar *id* 0)
 (defvar *maxchar* 320)
 (defvar *maxpost* 10)
