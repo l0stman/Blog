@@ -3,7 +3,7 @@
 (defmacro deffold (uri path &optional content-type)
   "Define a directory handler for the folder PATH witch will emits all
 the files under URI.  If CONTENT-TYPE is not NIL, it will be used as
-the default content-type for all files under in the folder."
+the default content-type for all files in the folder."
   `(push (create-folder-dispatcher-and-handler
           ,uri
           ,(let ((p (pathname path)))
