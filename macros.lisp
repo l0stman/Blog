@@ -18,12 +18,12 @@ the default content-type for all files in the folder."
           ,content-type)
          *dispatch-table*))
 
-(defmacro w/html ((&key title) &body body)
+(defmacro w/html ((&key title (css "static/blog.css")) &body body)
   "Write html code to the standard output with a header."
   `(with-html-output-to-string (*standard-output* nil :prologue t)
      (:html
       (:head (:title (esc (or ,title *title*))))
-      (:link :rel "stylesheet" :type "text/css" :href "static/blog.css")
+      (:link :rel "stylesheet" :type "text/css" :href ,css)
       (:body ,@body))))
 
 (defmacro html/s ((&key prologue) &body body)
