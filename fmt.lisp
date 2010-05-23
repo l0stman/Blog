@@ -1,6 +1,6 @@
 (in-package :blog)
 
-(defmacro deffmt (name (s &key start end) &body plist)
+(defmacro deffmt (name (s &key start end) docstring &body plist)
   "Define the function NAME that applies a regex based transformation
 on the string S. PLIST is a property list of regex and replacement
 string passed successively to `regex-replace-all'.  If supplied, the
@@ -9,6 +9,7 @@ and after the above transformations."
   (flet ((call (fn) (if fn `((,s (,fn ,s)))))
          (mklist (o) (if (listp o) o (list o))))
     `(defun ,name (,s)
+       ,docstring
        (let*
 	   (,@(call start)
 	    ,@(loop for (re repmt) on plist by #'cddr collect
@@ -18,8 +19,8 @@ and after the above transformations."
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
-;;; Transform the ASCII string to HTML by escaping characters.
 (deffmt in-fmt (s :start escape-string)
+  "Transform the ASCII string to HTML by escaping characters."
   "(?s)^\\s*(.*)\\s*$" "\\1"
   "(?s)(?:^|(?:\\r\\n){2,})&gt;(.*?)((\\r\\n){2,}|$)"
   ((list "<blockquote>"
@@ -35,6 +36,7 @@ and after the above transformations."
   "--" "&mdash;")
 
 (deffmt unesc (s)
+    "Reverse the result of escape-string."
   "&lt;" "<"
   "&gt;" ">"
   "&quot;" "\""
@@ -45,8 +47,8 @@ and after the above transformations."
          (format nil "~a" (code-char (read-from-string (subseq r1 n))))))
      :simple-calls t))
 
-;;; Transform back the HTML string to ASCII and unescape special characters.
 (deffmt out-fmt (s :end unesc)
+  "Transform back the HTML string to ASCII and unescape special characters."
   "<p>" *ret*
   "(?s)<blockquote>(.*?)</blockquote>"
   ((list *ret* ">"
