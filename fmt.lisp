@@ -8,21 +8,22 @@
 	   (,@(call start)
 	    ,@(loop for p in body collect
 		   `(,s (regex-replace-all ,(first p) ,s ,@(cdr p))))
-	      ,@(call end)) 
+	      ,@(call end))
 	 s))))
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
 ;; Transform the ascii string to html by escaping characters.
 (deffmt in-fmt (s :start escape-string)
-  ("(^(\\r\\n)?|(\\r\\n){2,})&gt;((.|\\s)*?)((\\r\\n){2,}|$)"
+  ("(?s)^\\s*(.*)\\s*$" "\\1")
+  ("(?s)(?:^|(?:\\r\\n){2,})&gt;(.*?)((\\r\\n){2,}|$)"
    (list "<blockquote>"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
-	     (regex-replace-all "\\r\\n&gt;" (fourth regs) "<br>"))
+	     (regex-replace-all "\\r\\n&gt;" (first regs) "<br>"))
 	 "</blockquote>")
    :simple-calls t)
-  ("(\\r\\n){2,}" "<p>") 
+  ("(\\r\\n){2,}" "<p>")
   ("\\*([^*]*)(\\*|$)" "<strong>\\1</strong>")
   ("_([^_]*)(_|$)" "<em>\\1</em>")
   ("\\[([^]]+)\\]\\(([^)]+)(\\)|$)" "<a href=\"\\2\">\\1</a>")
@@ -39,8 +40,8 @@
 
 ;; Transform back the html string to ascii and unescape special characters.
 (deffmt out-fmt (s :end unesc)
-  ("<p>" *ret*) 
-  ("<blockquote>((.|\\s)*?)</blockquote>" 
+  ("<p>" *ret*)
+  ("(?s)<blockquote>(.*?)</blockquote>"
    (list *ret* ">"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
