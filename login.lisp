@@ -70,7 +70,7 @@
 (defun salt () (random-octets 8))
 
 (defvar *salt* (salt))
-(defvar *kdf* (make-kdf 'ironclad:pbkdf2 :digest 'ironclad:sha1))
+(defvar *kdf* (make-kdf 'ironclad:pbkdf2 :digest 'ironclad:sha256))
 
 (defun hash (pass)
   "Compute the password digest using PBKDF2."
