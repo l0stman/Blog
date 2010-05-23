@@ -20,7 +20,7 @@ and after the above transformations."
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
 (deffmt in-fmt (s :start escape-string)
-  "Transform the ASCII string to HTML by escaping characters."
+    "Transform the ASCII string to HTML by escaping characters."
   "(?s)^\\s*(.*)\\s*$" "\\1"
   "(?s)(?:^|(?:\\r\\n){2,})&gt;(.*?)((\\r\\n){2,}|$)"
   ((list "<blockquote>"
