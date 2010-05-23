@@ -18,8 +18,8 @@ and after the above transformations."
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
+;;; Transform the ASCII string to HTML by escaping characters.
 (deffmt in-fmt (s :start escape-string)
-  "Transform the ASCII string to HTML by escaping characters."
   "(?s)^\\s*(.*)\\s*$" "\\1"
   "(?s)(?:^|(?:\\r\\n){2,})&gt;(.*?)((\\r\\n){2,}|$)"
   ((list "<blockquote>"
@@ -45,8 +45,8 @@ and after the above transformations."
          (format nil "~a" (code-char (read-from-string (subseq r1 n))))))
      :simple-calls t))
 
+;;; Transform back the HTML string to ASCII and unescape special characters.
 (deffmt out-fmt (s :end unesc)
-  "Transform back the HTML string to ASCII and unescape special characters."
   "<p>" *ret*
   "(?s)<blockquote>(.*?)</blockquote>"
   ((list *ret* ">"
