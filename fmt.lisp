@@ -2,7 +2,7 @@
 
 (defmacro deffmt (name (s &key start end) docstring &body plist)
   "Define the function NAME that applies a regex based transformation
-on the string S. PLIST is a property list of regex and replacement
+to the string S. PLIST is a property list of regex and replacement
 string passed successively to `regex-replace-all'.  If supplied, the
 function START and the function END are applied respectively before
 and after the above transformations."
