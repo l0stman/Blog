@@ -13,7 +13,7 @@
 (defun fmt-help ()
   "Text formatting help."
   (html/s ()
-    (:table 
+    (:table
      (:tr (:td "_emphasize_") (:td (:em "emphasize")))
      (:tr (:td "*strong*") (:td (:strong "strong")))
      (:tr (:td "> blockquote") (:td (:blockquote "blockquote")))
@@ -24,12 +24,12 @@
 
 (defun new-form (&key id title body)
   "Form to add or edit a post."
-  (w/html ()	  
-    (:form :class "config" :method "post" :action "new" 
+  (w/html ()
+    (:form :class "config" :method "post" :action "new"
 	   (when id
-	     (htm (:input :type "hidden" :name "id" :value id))) 
-	   (:div :class "post-title" (str (in-fmt title)))
-	   (:div :class "post-body" (str (in-fmt body)))
+	     (htm (:input :type "hidden" :name "id" :value id)))
+	   (:div :class "post-title" (str (in-fmt (or title ""))))
+	   (:div :class "post-body" (str (in-fmt (or body ""))))
 	   (:table
 	    (:tr
 	     (:td "title")
