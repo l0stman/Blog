@@ -48,7 +48,7 @@ and after the above transformations."
      :simple-calls t))
 
 (deffmt out-fmt (s :end unesc)
-  "Transform back the HTML string to ASCII and unescape special characters."
+    "Transform back the HTML string to ASCII and unescape special characters."
   "<p>" *ret*
   "(?s)<blockquote>(.*?)</blockquote>"
   ((list *ret* ">"
