@@ -1,13 +1,13 @@
 (in-package :blog)
 
-(defhand (admin "/admin" &key
-		(title *title*)
-		(maxchar *maxchar*)
-		(maxpost *maxpost*)
-                (maxfeed *maxfeed*)
-                (rss-desc *rss-description*)
-                (htoot-url (htoot-url))
-		(msg "Enter the new values:"))
+(defhand (admin "/admin")
+    (&key (title *title*)
+          (maxchar *maxchar*)
+          (maxpost *maxpost*)
+          (maxfeed *maxfeed*)
+          (rss-desc *rss-description*)
+          (htoot-url (htoot-url))
+          (msg "Enter the new values:"))
   (w/auth
    (w/html ()
      (:form :class "config" :method "post" :action "update"

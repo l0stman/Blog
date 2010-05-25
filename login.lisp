@@ -53,7 +53,7 @@
 (defun update-cookie ()
   (set-cookie *ck-name* :value (encode-cookie)))
 
-(defhand (logout "/logout")
+(defhand (logout "/logout") ()
   (set-cookie *ck-name* :expires (1- (get-universal-time)))
   (redirect (referer)))
 

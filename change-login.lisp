@@ -1,8 +1,8 @@
 (in-package :blog)
 
-(defhand (reset "/reset" &key (user *user*) (msg "Enter the new values:"))
+(defhand (reset "/reset") (&key (user *user*) (msg "Enter the new values:"))
   (w/auth
-   (w/html () 
+   (w/html ()
      (:form :class "config" :method "post" :action "change-login"
 	    (:div :class "message" (str msg))
 	    (:table
@@ -14,7 +14,7 @@
 	      (:td (:input :type "password" :name "pass")))
 	     (:tr
 	      (:td "Re-enter the password")
-	      (:td (:input :type "password" :name "pass2")))) 
+	      (:td (:input :type "password" :name "pass2"))))
 	    (:div :class "submit"
 		  (:input :type "submit" :value "update"))))))
 

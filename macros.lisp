@@ -31,12 +31,17 @@ the default content-type for all files in the folder."
   `(with-html-output-to-string (*standard-output* nil :prologue ,prologue)
      ,@body))
 
-(defmacro defhand ((name uri &rest args) &body body)
-  "Define the function name as a handler for the given uri."
-  `(progn
-     (defun ,name ,args ,@body)
-     (push (create-prefix-dispatcher ,uri ',name)
-	   *dispatch-table*)))
+(defmacro defhand ((name uri &key case-p) args &body body)
+  "Define the function NAME with arguments ARGS as a handler for the
+given URI.  If CASE-P is true, the generated HTML is case-sensitive."
+  (let ((downcase-p *downcase-tokens-p*))
+    (when case-p
+      (setq *downcase-tokens-p* nil))
+    `(progn
+       (defun ,name ,args ,@body)
+       (push (create-prefix-dispatcher ,uri ',name)
+             *dispatch-table*)
+       ,@(when case-p `((setq *downcase-tokens-p* ,downcase-p))))))
 
 (defmacro w/syms (args &body body)
   `(let ,(mapcar #'(lambda (x) `(,x (gensym)))
