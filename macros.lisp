@@ -33,7 +33,10 @@ the default content-type for all files in the folder."
 
 (defmacro defhand ((name uri &key case-p) args &body body)
   "Define the function NAME with arguments ARGS as a handler for the
-given URI.  If CASE-P is true, the generated HTML is case-sensitive."
+given URI.  If CASE-P is true, the generated HTML is case-sensitive.
+In the latter case, beware of the side-effect of setting
+*DOWNCASE-TOKENS-P* to NIL when expanding this macro.  This won't be
+restored until the code is compiled."
   (let ((downcase-p *downcase-tokens-p*))
     (when case-p
       (setq *downcase-tokens-p* nil))
