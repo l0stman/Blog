@@ -28,16 +28,35 @@
     :initform (get-universal-time))))
 
 (defun sys-time (ut)
-    (multiple-value-bind
-	  (second minute hour date month year) (decode-universal-time ut)
-      (format nil
-	      "~2,'0d/~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d"
-	      date
-	      month
-	      year
-	      hour
-	      minute
-	      second)))
+  (multiple-value-bind
+        (second minute hour date month year) (decode-universal-time ut)
+    (format nil
+            "~2,'0d/~2,'0d/~2,'0d ~2,'0d:~2,'0d:~2,'0d"
+            month
+            date
+            year
+            hour
+            minute
+            second)))
+
+(defun univ-time (ut)
+  (multiple-value-bind
+        (sec min hour date mon year day daylight-p tz)
+      (decode-universal-time ut)
+    (declare (ignore daylight-p))
+    (format nil
+            "~A, ~2,'0d ~A ~A ~2,'0d:~2,'0d:~2,'0d ~A~2,'0D00"
+            (aref '#("Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun") day)
+            date
+            (aref '#("Jan" "Feb" "Mar" "Apr" "May" "Jun"
+                     "Jul" "Aug" "Sep" "Oct" "Nov" "Dec")
+                  (1- mon))
+            year
+            hour
+            min
+            sec
+            (if (minusp tz) '+ '-)
+            (abs tz))))
 
 (defun make-post (title body)
   (make-instance 'post
