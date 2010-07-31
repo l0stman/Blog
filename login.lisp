@@ -93,7 +93,7 @@
 
 (define-easy-handler (login :uri "/login"
 			    :default-request-type :post)
-    (user msg uri)
+    (msg uri)
   (w/html ()
     (:form :class "config" :method "post" :action "verify"
 	   (:input :type "hidden" :name "uri" :value (or uri (referer)))
@@ -101,7 +101,7 @@
 	    (if msg (htm (:div :class "message" (str msg))))
 	    (:tr
 	     (:td "username")
-	     (:td (:input :type "text" :name "user" :value user)))
+	     (:td (:input :type "text" :name "user")))
 	    (:tr
 	     (:td "password")
 	     (:td (:input :type "password" :name "pass"))))
