@@ -15,7 +15,7 @@
 		 (:file "feed" :depends-on ("params"))
 		 (:file "save" :depends-on ("login" "params" "feed"))
                  (:file "blog" :depends-on ("login" "params"))
-		 (:file "new" :depends-on ("blog"))
+		 (:file "new" :depends-on ("save"))
 		 (:file "admin" :depends-on ("save"))
 		 (:file "change-login" :depends-on ("save")))
     :depends-on (:hunchentoot :cl-who :cl-ppcre :ironclad))
