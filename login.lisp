@@ -22,7 +22,13 @@
     (hmac-digest hmac)))
 
 (defun trustedp (data digest)
-  (equalp (digest data) digest))
+  (let ((digest1 (digest data))
+        (res 0))
+    (and (= (length digest1) (length digest))
+         (dotimes (i (length digest) (zerop res))
+           (setq res
+                 (logior res
+                         (logxor (aref digest i) (aref digest i))))))))
 
 (defvar *session-max-time* 3600
   "The time in seconds after which the cookie expires if unused.")
