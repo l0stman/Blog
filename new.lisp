@@ -1,14 +1,16 @@
 (in-package :blog)
 
-(defun add-post (id title body)
+(defun add-post (id title body uri)
   "Add a new post or edit an existing one."
   (when (string= title "")
     (setq title "No title"))
-  (if id
-      (edit-post id title body)
-      (ins-post title body))
-  (save-blog)
-  (redirect "/blog"))
+  (cond (id
+         (edit-post id title body)
+         (redirect uri))
+        (t
+         (ins-post title body)
+         (redirect "/blog")))
+  (save-blog))
 
 (defun fmt-help ()
   "Text formatting help."
@@ -22,12 +24,13 @@
       (:td (:a :href "http://www.google.com" "google")))
      (:tr (:td "foo -- bar") (:td "foo &mdash; bar")))))
 
-(defun new-form (&key id title body)
+(defun new-form (&key id title body uri)
   "Form to add or edit a post."
   (w/html ()
     (:form :class "config" :method "post" :action "new"
 	   (when id
 	     (htm (:input :type "hidden" :name "id" :value id)))
+           (:input :type "hidden" :name "uri" :value uri)
 	   (:div :class "post-title" (str (in-fmt (or title ""))))
 	   (:div :class "post-body" (str (in-fmt (or body ""))))
 	   (:table
@@ -43,19 +46,22 @@
 	   (:div :class "submit"
 		 (:input :type "submit" :name "action" :value "add")
 		 (:span :class "separator" " ")
-		 (:input :type "submit"  :name "action"
-			 :value "view"))
+		 (:input :type "submit"  :name "action" :value "view"))
 	   (str (fmt-help)))))
 
 (define-easy-handler (new-post :uri "/new"
 			       :default-request-type :post)
-    ((id :parameter-type 'integer) title body action)
+    ((id :parameter-type 'integer)
+     title
+     body
+     action
+     (uri :init-form (referer)))
   (w/auth
       (cond ((string= action "delete")
 	     (delete-post id)
 	     (save-blog)
-	     (redirect "/blog"))
-	    ((string= action "add") (add-post id title body)) 
+	     (redirect uri))
+	    ((string= action "add") (add-post id title body uri))
 	    (t
 	     (cond ((string= action "view")
 		    (setf title (post-parameter "title")
@@ -65,4 +71,4 @@
 		      (when p
 			(setf title (out-fmt (title p))
 			      body (out-fmt (body p))))))) 
-	     (new-form :id id :title title :body body)))))
+	     (new-form :id id :title title :body body :uri uri)))))
