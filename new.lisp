@@ -57,15 +57,18 @@
      action
      (uri :init-form (referer)))
   (w/auth
-   (if (string= action "add")
-       (add-post id title body uri)
-       (progn
-         (cond ((string= action "view")
-                (setf title (post-parameter "title")
-                      body (post-parameter "body")))
-               (id
-                (let ((p (find-post id)))
-                  (when p
-                    (setf title (out-fmt (title p))
-                          body (out-fmt (body p)))))))
-         (new-form :id id :title title :body body :uri uri)))))
+   (cond ((string= action "add")
+          (add-post id title body uri))
+         ((string= action "view")
+          (new-form :id id
+                    :title (or title (post-parameter "title"))
+                    :body (or body (post-parameter "body"))
+                    :uri uri))
+         ((string= action "edit")
+          (aif (find-post id)
+               (new-form :id id
+                         :title (out-fmt (title it))
+                         :body (out-fmt (body it))
+                         :uri uri)
+               (blog-error)))
+         (t (new-form)))))
