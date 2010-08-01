@@ -48,7 +48,7 @@ textarea {
 form.post-edit input[type=submit] {
     border: 0;
     font-weight: bold;
-     background-color: white;
+    background-color: white;
     font-size: 85%;
     color: gray;
 }
@@ -84,10 +84,6 @@ a.page, #header a, #title a, .config table a{
 .post-date {
     color: #888;
     font-size: 90%;
-}
-.postedit {
-    font-size: 20%;
-    margin: 0em;
 }
 .message {
     font-size: 110%;
