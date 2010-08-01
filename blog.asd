@@ -15,7 +15,7 @@
 		 (:file "feed" :depends-on ("params"))
 		 (:file "save" :depends-on ("login" "params" "feed"))
                  (:file "blog" :depends-on ("login" "params"))
-                 (:file "delete" :depends-on ("save"))
+                 (:file "delete" :depends-on ("save" "blog"))
 		 (:file "new" :depends-on ("delete"))
 		 (:file "admin" :depends-on ("save"))
 		 (:file "change-login" :depends-on ("save")))

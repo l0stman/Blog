@@ -7,9 +7,10 @@
   (w/auth
    (cond ((not delete-p)
           (w/html ()
+            (str (show (find-post id) nil :limit-p t))
             (:form :method "post" :action "delete"
                    (:div :class "message"
-                         (fmt "Do you really want to delete post ~D?" id))
+                         (fmt "Do you really want to delete this post?"))
                    (:input :type "hidden" :name "id" :value id)
                    (:input :type "hidden" :name "uri" :value uri)
                    (:div :class "submit"
