@@ -2,7 +2,7 @@
 
 (define-easy-handler (del-conf :uri "/delete"
                                :default-request-type :post)
-    ((id :parameter-type 'integer) delete-p uri)
+    ((id :parameter-type 'integer) delete-p (uri :init-form (referer)))
   "Ask confirmation before deleting a post."
   (w/auth
    (cond ((not delete-p)

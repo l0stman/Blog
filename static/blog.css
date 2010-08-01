@@ -45,7 +45,11 @@ textarea {
     height: 14em;
 }
 
-form.post-edit input[type=submit] {
+div.post-edit form {
+    display: inline-block;
+}
+
+div.post-edit form input[type=submit] {
     border: 0;
     font-weight: bold;
     background-color: white;

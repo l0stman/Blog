@@ -10,11 +10,19 @@
 	 (:div :class "post-date" (str (sys-time (date post))))
 	 (:div :class "post-body" (str (if limit-p (stub post) (body post))))
 	 (when logged-p
-	   (htm
-	    (:form :method "post" :action "new" :class "post-edit"
-		   (:input :type "hidden" :name "id" :value (id post))
-		   (:input :type "submit" :name "action" :value "edit")
-		   (:input :type "submit" :name "action" :value "delete")))))))
+           (macrolet ((edit-form (action value &optional name)
+                        `(html/s ()
+                           (:form :method "post" :action ,action
+                                  (:input :type "hidden"
+                                          :name "id"
+                                          :value (id post))
+                                  (:input :type "submit"
+                                          ,@(when name `(:name ,name))
+                                          :value ,value)))))
+             (htm
+              (:div :class "post-edit"
+               (str (edit-form "new" "edit" "action"))
+               (str (edit-form "delete" "delete")))))))))
 
 (defun header (log-p)
   (html/s ()
