@@ -17,14 +17,12 @@
 
 (defmethod print-object ((table hash-table) s)
   (if *print-readably*
-      (format
-       s
-       "#.~S"
-       `(let ((table (make-hash-table)))
-          ,(aif (loop for k being the hash-keys in table using (hash-value v)
-                   nconc `((gethash ,k table) ,v))
-                `(setf ,@it))
-          table))
+      (format s "#.~S"
+              `(let ((table (make-hash-table)))
+                 ,(aif (loop for k being the hash-keys in table
+                          using (hash-value v) nconc `((gethash ,k table) ,v))
+                       `(setf ,@it))
+                 table))
       (call-next-method)))
 
 (defparameter *params*
