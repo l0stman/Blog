@@ -35,24 +35,24 @@
 
 (defun expiredp (time)
   (aif (parse-integer time :junk-allowed t)
-    (< (+ it *session-max-time*) (get-universal-time))))
+    (< it (get-universal-time))))
 
 (defun encode-cookie ()
-  "Return a string containing the current time and its MAC separated by &."
-  (let ((time (write-to-string (get-universal-time))))
+  "Return a string containing the expiration time and its MAC separated by &."
+  (let ((exp (write-to-string (+ (get-universal-time) *session-max-time*))))
     (with-output-to-string (s)
-      (format s "~a&" time)
-      (loop for ch across (digest time)
+      (format s "exp=~a&digest=" exp)
+      (loop for ch across (digest exp)
 	   do (princ (code-char ch) s)))))
 
 (defun decode-cookie (c)
   "Return the values of the creation time of the cookie and its MAC."
-  (let ((p (position #\& c :test #'char=)))
-    (and p
-	 (values (subseq c 0 p)
-		 (sto (subseq c (1+ p)))))))
+  (let ((entries (split "[&=]" c :limit 4)))
+    (and (string= (first entries) "exp")
+         (string= (third entries) "digest")
+         (values (second entries) (fourth entries)))))
 
-(defvar *ck-name* "t"
+(defvar *ck-name* "auth"
   "Name of the cookie for authentication.")
 
 (declaim (inline update-cookie))
@@ -68,7 +68,7 @@
   (aif (cookie-in *ck-name*)
     (multiple-value-bind (time digest) (decode-cookie it)
       (and time
-	   (trustedp time digest)
+	   (trustedp time (sto digest))
 	   (cond ((expiredp time) (logout) nil)
 		 (t (update-cookie) t))))))
 
