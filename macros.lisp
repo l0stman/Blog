@@ -12,8 +12,10 @@ the default content-type for all files in the folder."
                     (make-pathname
                      :directory (append
                                  (pathname-directory
-                                  (load-time-value (or #.*compile-file-pathname*
-                                                       *load-pathname*)))
+                                  (truename
+                                   (load-time-value
+                                    (or #.*compile-file-pathname*
+                                        *load-pathname*))))
                                  (list path)))))
           ,content-type)
          *dispatch-table*))
