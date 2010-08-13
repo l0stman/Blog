@@ -9,14 +9,10 @@ the default content-type for all files in the folder."
           ,(let ((p (pathname path)))
                 (if (eq (car (pathname-directory p)) :absolute)
                     p
-                    (make-pathname
-                     :directory (append
-                                 (pathname-directory
-                                  (truename
-                                   (load-time-value
-                                    (or #.*compile-file-pathname*
-                                        *load-pathname*))))
-                                 (list path)))))
+                    (let ((dir (or #.*compile-file-truename* *load-truename*)))
+                      (make-pathname
+                       :directory (append (pathname-directory dir)
+                                          (list path))))))
           ,content-type)
          *dispatch-table*))
 
