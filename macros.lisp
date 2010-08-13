@@ -16,18 +16,18 @@ the default content-type for all files in the folder."
           ,content-type)
          *dispatch-table*))
 
-(defmacro w/html ((&key title (css "static/blog.css")) &body body)
-  "Write html code to the standard output with a header."
-  `(with-html-output-to-string (*standard-output* nil :prologue t)
-     (:html
-      (:head (:title (esc (or ,title *title*))))
-      (:link :rel "stylesheet" :type "text/css" :href ,css)
-      (:body ,@body))))
-
 (defmacro html/s ((&key prologue) &body body)
   "Write the html strings to the standard output."
   `(with-html-output-to-string (*standard-output* nil :prologue ,prologue)
      ,@body))
+
+(defmacro w/html ((&key title (css "static/blog.css")) &body body)
+  "Write html code to the standard output with a header."
+  `(html/s (:prologue t)
+     (:html
+      (:head (:title (esc (or ,title *title*))))
+      (:link :rel "stylesheet" :type "text/css" :href ,css)
+      (:body ,@body))))
 
 (defmacro defhand ((name uri &key case-p) args &body body)
   "Define the function NAME with arguments ARGS as a handler for the
