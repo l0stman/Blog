@@ -1,8 +1,10 @@
 (in-package :blog)
 
+(deftype octet-array () `(simple-array (unsigned-byte 8) (*)))
+
 (defun sto (s)
   "Transform a string to an array of octets."
-  (map '(simple-array (unsigned-byte 8) (*)) #'char-code s))
+  (map 'octet-array #'char-code s))
 
 (defun random-octets (size)
   "Return random octets of the given size"
