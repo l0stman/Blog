@@ -15,16 +15,6 @@
 	 stub))
       (call-next-method)))
 
-(defmethod print-object ((table hash-table) s)
-  (if *print-readably*
-      (format s "#.~S"
-              `(let ((table (make-hash-table)))
-                 ,(aif (loop for k being the hash-keys in table
-                          using (hash-value v) nconc `((gethash ,k table) ,v))
-                       `(setf ,@it))
-                 table))
-      (call-next-method)))
-
 (defparameter *params*
   '(*title* *id* *maxchar* *maxpost* *user* *salt* *hash* *htoot-url*
     *maxfeed* *rss-description*))
@@ -34,25 +24,32 @@
 		       :direction :output
 		       :if-exists :supersede)
     (with-standard-io-syntax
-      (let ((*package* (find-package :blog)))
-	(let ((*print-readably* nil))
-          (flet ((to-octets (obj)
-                   `(coerce ,obj '(simple-array (unsigned-byte 8) (*)))))
-            (format out "#.~S"
-                    `(setq
-                      ,@(loop for sym in *params* append
-                             `(,sym ,(if (eq sym '*salt*)
-                                         (to-octets (symbol-value sym))
-                                         (symbol-value sym))))))))
-	(let ((*print-readably* t))
-          (print *blog* out))))))
+      (let* ((*package* (find-package :blog))
+             (*print-readably* t))
+	(princ "#.(setf " out)
+        (dolist (sym *params*)
+          (format out "~S ~S "
+                  sym
+                  (let ((val (symbol-value sym)))
+                    (if (typep val 'octet-array)
+                        `(coerce ,(coerce val 'simple-vector) 'octet-array)
+                        val))))
+        (format out "*blog* ~S "
+                `(make-hash-table
+                  :test ',(hash-table-test *blog*)
+                  :size ,(hash-table-size *blog*)
+                  :rehash-size ,(hash-table-rehash-size *blog*)
+                  :rehash-threshold ,(hash-table-rehash-threshold *blog*)))
+        (maphash #'(lambda (id post)
+                     (format out "(gethash ~S *blog*) ~S " id post))
+                 *blog*)
+        (princ #\) out)))))
 
 (defun load-blog ()
   (with-open-file (in *db*)
     (with-standard-io-syntax
       (let* ((*package* (find-package :blog)))
-	(read in)
-	(setq *blog* (read in))))))
+	(read in)))))
 
 
 (when (probe-file *db*)
