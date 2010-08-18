@@ -4,13 +4,11 @@
   "Add a new post or edit an existing one."
   (when (string= title "")
     (setq title "No title"))
-  (cond (id
-         (edit-post id title body)
-         (redirect uri))
-        (t
-         (ins-post title body)
-         (redirect "/blog")))
-  (save-blog))
+  (if id
+      (edit-post id title body)
+      (ins-post title body))
+  (save-blog)
+  (redirect (if id uri "/blog")))
 
 (defun fmt-help ()
   "Text formatting help."
