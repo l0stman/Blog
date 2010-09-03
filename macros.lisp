@@ -29,6 +29,14 @@ the default content-type for all files in the folder."
       (:link :rel "stylesheet" :type "text/css" :href ,css)
       (:body ,@body))))
 
+(defmacro w/xml ((&key (prologue "<?xml version=\"1.0\"?>")) &body body)
+  "Write the xml strings to the standard output."
+  `(with-output-to-string (*standard-output*)
+     ,(let (*downcase-tokens-p*)
+        (macroexpand
+         `(with-html-output (*standard-output* nil :prologue ,prologue)
+            ,@body)))))
+
 (defmacro defhand ((name uri) args &body body)
   "Define the function NAME with arguments ARGS as a handler for the
 given URI."
