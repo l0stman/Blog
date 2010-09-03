@@ -29,20 +29,13 @@ the default content-type for all files in the folder."
       (:link :rel "stylesheet" :type "text/css" :href ,css)
       (:body ,@body))))
 
-(defmacro defhand ((name uri &key case-p) args &body body)
+(defmacro defhand ((name uri) args &body body)
   "Define the function NAME with arguments ARGS as a handler for the
-given URI.  If CASE-P is true, the generated HTML is case-sensitive.
-In the latter case, beware of the side-effect of setting
-*DOWNCASE-TOKENS-P* to NIL when expanding this macro.  This won't be
-restored until the code is compiled."
-  (let ((downcase-p *downcase-tokens-p*))
-    (when case-p
-      (setq *downcase-tokens-p* nil))
-    `(progn
-       (defun ,name ,args ,@body)
-       (push (create-prefix-dispatcher ,uri ',name)
-             *dispatch-table*)
-       ,@(when case-p `((setq *downcase-tokens-p* ,downcase-p))))))
+given URI."
+  `(progn
+     (defun ,name ,args ,@body)
+     (push (create-prefix-dispatcher ,uri ',name)
+           *dispatch-table*)))
 
 (defmacro w/syms (args &body body)
   `(let ,(mapcar #'(lambda (x) `(,x (gensym)))
