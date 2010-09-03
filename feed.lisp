@@ -13,8 +13,8 @@ directly accessible to the outside world.")
 (defun htoot-url ()
   (or *htoot-url* (format nil "http://~A" (host))))
 
-(defhand (feed "/feed" :case-p t) ()
-  (html/s (:prologue "<?xml version=\"1.0\"?>")
+(defhand (feed "/feed") ()
+  (w/xml ()
     (:|rss| :|version| "2.0"
       (:|channel|
         (:|title| (str *title*))
