@@ -21,7 +21,6 @@ and after the above transformations."
 
 (deffmt in-fmt (s :start escape-string)
     "Transform the ASCII string to HTML by escaping characters."
-  "(?s)^\\s*(.*)\\s*$" "\\1"
   "(?s)(?:^|(?:\\r\\n){2,})&gt;(.*?)((\\r\\n){2,}|$)"
   ((list "<blockquote>"
          #'(lambda (m &rest regs)
