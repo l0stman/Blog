@@ -58,7 +58,7 @@ and after the above transformations."
     "Transform back the HTML string to ASCII and unescape special characters."
   "<p>" *ret*
   "(?s)<blockquote>(.*?)</blockquote>"
-  ((list "\\r\\n>"
+  ((list *ret* ">"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
 	     (regex-replace-all "<br>"
