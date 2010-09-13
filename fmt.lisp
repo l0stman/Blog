@@ -28,9 +28,17 @@ and after the above transformations."
              (regex-replace-all "\\r\\n&gt;" (first regs) "<br>"))
          "</blockquote>")
    :simple-calls t)
+  "(?s)(?:^|\\r\\n) {4}(.*?)(\\r\\n(?! {4})|$)"
+  ((list *ret* "<pre><code>"
+         #'(lambda (m &rest regs)
+             (declare (ignore m))
+             (regex-replace-all "(?<=\\r\\n) {4}" (first regs) ""))
+         "</code></pre>")
+   :simple-calls t)
   "(\\r\\n){2,}" "<p>"
-  "\\*([^*]*)(\\*|$)" "<strong>\\1</strong>"
-  "_([^_]*)(_|$)" "<em>\\1</em>"
+  "(?<!\\\\)\\*([^*]*)((?<!\\\\)\\*|$)" "<strong>\\1</strong>"
+  "(?<!\\\\)_([^_]*)((?<!\\\\)_|$)" "<em>\\1</em>"
+  "\\" ""
   "\\[([^]]+)\\]\\(([^)]+)(\\)|$)" "<a href=\"\\2\">\\1</a>"
   "--" "&mdash;")
 
@@ -50,7 +58,7 @@ and after the above transformations."
     "Transform back the HTML string to ASCII and unescape special characters."
   "<p>" *ret*
   "(?s)<blockquote>(.*?)</blockquote>"
-  ((list *ret* ">"
+  ((list "\\r\\n>"
 	 #'(lambda (m &rest regs)
 	     (declare (ignore m))
 	     (regex-replace-all "<br>"
@@ -58,6 +66,14 @@ and after the above transformations."
 				(coerce '(#\return #\newline #\>) 'string)))
 	 *ret*)
    :simple-calls t)
+  "(?s)<pre><code>(.*?)</code></pre>"
+  ((list "    "
+         #'(lambda (m &rest regs)
+             (declare (ignore m))
+             (regex-replace-all "(?<=\\r\\n)" (first regs) "    "))
+         *ret*)
+   :simple-calls t)
+  "(\\*|_)" "\\\\\\1"
   "</?strong>" "*"
   "</?em>" "_"
   "<a +href=\"([^\"]*)\">([\\w ]+)</a>" "[\\2](\\1)"
