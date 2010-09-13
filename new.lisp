@@ -20,7 +20,8 @@
      (:tr
       (:td "[google](http://www.google.com)")
       (:td (:a :href "http://www.google.com" "google")))
-     (:tr (:td "foo -- bar") (:td "foo &mdash; bar")))))
+     (:tr (:td "foo -- bar") (:td "foo &mdash; bar"))
+     (:tr (:td "Lines starting with four spaces are treated like code")))))
 
 (defun new-form (&key id title body uri)
   "Form to add or edit a post."
