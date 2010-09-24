@@ -39,6 +39,13 @@ to DST."
                (esc-html src dst :start (1+ i) :end pos)
                (princ "</strong>" dst)
                (setq delta (- (1+ pos) i))))
+            ((#\\)
+             (cond ((and (< (1+ i) len)
+                         (or (char= #\* (aref src (1+ i)))
+                             (char= #\_ (aref src (1+ i)))))
+                    (princ (aref src (1+ i)) dst)
+                    (setq delta 2))
+                   (t (princ #\\ dst))))
             (otherwise (princ (aref src i) dst)))
           (incf i delta))))
 
@@ -129,4 +136,3 @@ or the closing tag `</em>' or `</strong>'."
   "Transform back the HTML string to ASCII and unescape special characters."
   (with-output-to-string (d)
     (unesc-html s d)))
-
