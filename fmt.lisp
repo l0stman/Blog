@@ -7,6 +7,10 @@
   (with-output-to-string (d)
     (esc-html s d)))
 
+(declaim (inline specialp))
+(defun specialp (ch)
+  (or (char= #\* ch) (char= #\_ ch)))
+
 (defun esc-html (src dst &key (start 0) (end (length src)))
   "Escape all special HTML characters in the string SRC and write it
 to DST."
@@ -40,9 +44,7 @@ to DST."
                (princ "</strong>" dst)
                (setq delta (- (1+ pos) i))))
             ((#\\)
-             (cond ((and (< (1+ i) end)
-                         (or (char= #\* (aref src (1+ i)))
-                             (char= #\_ (aref src (1+ i)))))
+             (cond ((and (< (1+ i) end) (specialp (aref src (1+ i))))
                     (princ (aref src (1+ i)) dst)
                     (setq delta 2))
                    (t (princ #\\ dst))))
