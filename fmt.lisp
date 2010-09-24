@@ -40,7 +40,7 @@ to DST."
                (princ "</strong>" dst)
                (setq delta (- (1+ pos) i))))
             ((#\\)
-             (cond ((and (< (1+ i) len)
+             (cond ((and (< (1+ i) end)
                          (or (char= #\* (aref src (1+ i)))
                              (char= #\_ (aref src (1+ i)))))
                     (princ (aref src (1+ i)) dst)
