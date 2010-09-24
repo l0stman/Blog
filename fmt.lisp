@@ -19,31 +19,12 @@ and after the above transformations."
 
 (defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
 
-(deffmt in-fmt (s :start escape-string)
+(defun in-fmt (s)
     "Transform the ASCII string to HTML by escaping characters."
-  "(?s)(?:^|(?:\\r\\n){2,})&gt;(.*?)((\\r\\n){2,}|$)"
-  ((list "<blockquote>"
-         #'(lambda (m &rest regs)
-             (declare (ignore m))
-             (regex-replace-all "\\r\\n&gt;" (first regs) "<br>"))
-         "</blockquote>")
-   :simple-calls t)
-  "(?s)(?:^|\\r\\n) {4}(.*?)(\\r\\n(?! {4})|$)"
-  ((list *ret* "<pre><code>"
-         #'(lambda (m &rest regs)
-             (declare (ignore m))
-             (regex-replace-all "(?<=\\r\\n) {4}" (first regs) ""))
-         "</code></pre>")
-   :simple-calls t)
-  "(\\r\\n){2,}" "<p>"
-  "(?<!\\\\)\\*([^*]*)((?<!\\\\)\\*|$)" "<strong>\\1</strong>"
-  "(?<!\\\\)_([^_]*)((?<!\\\\)_|$)" "<em>\\1</em>"
-  "\\" ""
-  "\\[([^]]+)\\]\\(([^)]+)(\\)|$)" "<a href=\"\\2\">\\1</a>"
-  "--" "&mdash;")
+    (escape-string s))
 
-(deffmt unesc (s)
-    "Reverse the result of escape-string."
+(deffmt out-fmt (s)
+    "Transform back the HTML string to ASCII and unescape special characters."
   "&lt;" "<"
   "&gt;" ">"
   "&quot;" "\""
@@ -54,27 +35,3 @@ and after the above transformations."
          (format nil "~a" (code-char (read-from-string (subseq r1 n))))))
      :simple-calls t))
 
-(deffmt out-fmt (s :end unesc)
-    "Transform back the HTML string to ASCII and unescape special characters."
-  "<p>" *ret*
-  "(?s)<blockquote>(.*?)</blockquote>"
-  ((list *ret* ">"
-	 #'(lambda (m &rest regs)
-	     (declare (ignore m))
-	     (regex-replace-all "<br>"
-				(first regs)
-				(coerce '(#\return #\newline #\>) 'string)))
-	 *ret*)
-   :simple-calls t)
-  "(?s)<pre><code>(.*?)</code></pre>"
-  ((list "    "
-         #'(lambda (m &rest regs)
-             (declare (ignore m))
-             (regex-replace-all "(?<=\\r\\n)" (first regs) "    "))
-         *ret*)
-   :simple-calls t)
-  "(\\*|_)" "\\\\\\1"
-  "</?strong>" "*"
-  "</?em>" "_"
-  "<a +href=\"([^\"]*)\">([\\w ]+)</a>" "[\\2](\\1)"
-  "&mdash;" "--")
