@@ -74,6 +74,17 @@ these conditions are not met."
        (setq i match-end))
       (t (incf i)))))
 
+(defun unesc-amp (src dst start)
+  "Unescape the HTML string SRC after an ampersand and write the
+  result to DST. Return the position immediately after HTML entity."
+  (case-match (src :start start)
+    ("^lt;" (princ #\< dst) match-end)
+    ("^gt;" (princ #\> dst) match-end)
+    ("^quot;" (princ #\" dst) match-end)
+    ("^amp;" (princ #\& dst) match-end)
+    ("^#039;" (princ #\' dst) mactch-end)
+    (t (princ #\& dst) (1+ start))))
+
 (defun unesc-html (src dst &key (start 0) (end (length src)))
   "Transform back all special HTML characters to ASCII in the string SRC."
   (loop
@@ -81,6 +92,7 @@ these conditions are not met."
      while (< i end)
      do (case (aref src i)
           (#\&
+           (setq i (unesc-amp))
            (case-match (src :start (1+ i))
              ("^lt;"
               (princ #\< dst)
