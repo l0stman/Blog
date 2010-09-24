@@ -1,6 +1,7 @@
 (in-package :blog)
 
-(defvar *ret* (coerce '(#\return #\newline #\return #\newline) 'string))
+(defvar *eol* (coerce '(#\return #\newline) 'string))
+(defvar *emptyl* (concatenate 'string *eol* *eol*))
 
 (defun in-fmt (s)
   "Transform the ASCII string to HTML by escaping characters."
