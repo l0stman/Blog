@@ -84,7 +84,7 @@ these conditions are not met."
     ("^quot;" (princ #\" dst) match-end)
     ("^amp;" (princ #\& dst) match-end)
     ("^#039;" (princ #\' dst) match-end)
-    (t (princ #\& dst) (1+ start))))
+    (t (princ #\& dst) start)))
 
 (defun unesc-lt (src dst start end)
   "Unescape the HTML string SRC after a left angle bracket and write
