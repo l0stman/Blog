@@ -50,6 +50,7 @@ to DST."
                      `(progn ,@(cdr cl)) ; default statement
                      `(multiple-value-bind (match-start match-end)
                           (scan ,(car cl) ,src :start ,start)
+                        (declare (ignorable match-end))
                         (if match-start
                             (progn ,@(cdr cl))
                             ,(iter (cdr clauses)))))))))
