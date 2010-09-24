@@ -9,8 +9,7 @@
     (esc-html s d)))
 
 (declaim (inline specialp))
-(defun specialp (ch)
-  (or (char= #\* ch) (char= #\_ ch) (char= #\\ ch)))
+(defun specialp (ch) (find ch "*_\\>"))
 
 (defun esc-html (src dst &key (start 0) (end (length src)))
   "Escape all special HTML characters in the string SRC and write it
