@@ -7,12 +7,12 @@
   (with-output-to-string (d)
     (esc-html s d)))
 
-(defun esc-html (src dst &key (start 0) end)
+(defun esc-html (src dst &key (start 0) (end (length src)))
   "Escape all special HTML characters in the string SRC and write it
 to DST."
   (loop
-     with i = 0
-     while (< i (length src))
+     with i = start
+     while (< i end)
      do (let ((delta 1))
           (case (aref src i)
             ((#\<) (princ "&lt;" dst))
@@ -27,6 +27,18 @@ to DST."
                      (setq delta (- mend i)))
                    (princ "&amp;" dst))))
             ((#\") (princ "&quot;" dst))
+            ((#\_)
+             (let ((pos (or (position #\_ src :start (1+ i) :end end) end)))
+               (princ "<em>" dst)
+               (esc-html src dst :start (1+ i) :end pos)
+               (princ "</em>" dst)
+               (setq delta (- (1+ pos) i))))
+            ((#\*)
+             (let ((pos (or (position #\* src :start (1+ i) :end end) end)))
+               (princ "<strong>" dst)
+               (esc-html src dst :start (1+ i) :end pos)
+               (princ "</strong>" dst)
+               (setq delta (- (1+ pos) i))))
             (otherwise (princ (aref src i) dst)))
           (incf i delta))))
 
