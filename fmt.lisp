@@ -21,7 +21,6 @@ to DST."
      do (let ((delta 1))
           (case (aref src i)
             (#\< (princ "&lt;" dst))
-            (#\> (princ "&gt;" dst))
             (#\' (princ "&#039;" dst))
             (#\&
              (multiple-value-bind (mstart mend)
@@ -49,6 +48,23 @@ to DST."
                     (princ (aref src (1+ i)) dst)
                     (setq delta 2))
                    (t (princ #\\ dst))))
+            (#\>
+             (cond ((or (zerop i)
+                        (and (> i 1)
+                             (string= *emptyl*
+                                      src
+                                      :start2 (- i (length *emptyl*))
+                                      :end2 i)))
+                    (princ "<blockquote>" dst)
+                    (case-match (src :start (1+ i))
+                      ("(\\r\\n){2,}"
+                       (esc-html src dst :start (1+ i) :end (1- match-start))
+                       (setq delta (- match-end i)))
+                      (t
+                       (write-sequence src dst :start (1+ i) :end end)
+                       (setq delta (- end i))))
+                    (princ "</blockquote>" dst))
+                   (t (princ "&gt;" dst))))
             (otherwise (princ (aref src i) dst)))
           (incf i delta))))
 
