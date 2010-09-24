@@ -76,14 +76,42 @@ these conditions are not met."
 
 (defun unesc-amp (src dst start)
   "Unescape the HTML string SRC after an ampersand and write the
-  result to DST. Return the position immediately after HTML entity."
+  result to DST. Return the position immediately after the HTML
+  entity."
   (case-match (src :start start)
     ("^lt;" (princ #\< dst) match-end)
     ("^gt;" (princ #\> dst) match-end)
     ("^quot;" (princ #\" dst) match-end)
     ("^amp;" (princ #\& dst) match-end)
-    ("^#039;" (princ #\' dst) mactch-end)
+    ("^#039;" (princ #\' dst) match-end)
     (t (princ #\& dst) (1+ start))))
+
+(defun unesc-lt (src dst start end)
+  "Unescape the HTML string SRC after a left angle bracket and write
+the result to DST.  Return the position immediately after the bracket
+or the closing tag `</em>' or `</strong>'."
+  (case-match (src :start start)
+    ("^em>"
+     (let ((pos (scan-tag "em" src (+ start 3) end)))
+       (princ #\_ dst)
+       (unesc-html src
+                   dst
+                   :start (+ start 3)
+                   :end (if (< pos end) (- pos 5) end))
+       (princ #\_ dst)
+       pos))
+    ("^strong>"
+     (let ((pos (scan-tag "strong" src (+ start 7) end)))
+       (princ #\* dst)
+       (unesc-html src
+                   dst
+                   :start (+ start 7)
+                   :end (if (< pos end) (- pos 9) end))
+       (princ #\* dst)
+       pos))
+    (t
+     (princ #\< dst)
+     start)))
 
 (defun unesc-html (src dst &key (start 0) (end (length src)))
   "Transform back all special HTML characters to ASCII in the string SRC."
@@ -91,50 +119,8 @@ these conditions are not met."
      with i = start
      while (< i end)
      do (case (aref src i)
-          (#\&
-           (setq i (unesc-amp))
-           (case-match (src :start (1+ i))
-             ("^lt;"
-              (princ #\< dst)
-              (setq i match-end))
-             ("^gt;"
-              (princ #\> dst)
-              (setq i match-end))
-             ("^quot;"
-              (princ #\" dst)
-              (setq i match-end))
-             ("^amp;"
-              (princ #\& dst)
-              (setq i match-end))
-             ("^#039;"
-              (princ #\' dst)
-              (setq i match-end))
-             (t
-              (princ #\& dst)
-              (incf i))))
-          (#\<
-           (case-match (src :start (1+ i))
-             ("^em>"
-              (let ((pos (scan-tag "em" src (+ i 4) end)))
-                (princ #\_ dst)
-                (unesc-html src
-                            dst
-                            :start (+ i 4)
-                            :end (if (< pos end) (- pos 5) end))
-                (princ #\_ dst)
-                (setq i pos)))
-             ("^strong>"
-              (let ((pos (scan-tag "strong" src (+ i 8) end)))
-                (princ #\* dst)
-                (unesc-html src
-                            dst
-                            :start (+ i 8)
-                            :end (if (< pos end) (- pos 9) end))
-                (princ #\* dst)
-                (setq i pos)))
-             (t
-              (princ #\< dst)
-              (incf i))))
+          (#\& (setq i (unesc-amp src dst (1+ i))))
+          (#\< (setq i (unesc-lt src dst (1+ i) end)))
           (otherwise
            (princ (aref src i) dst)
            (incf i)))))
