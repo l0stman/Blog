@@ -128,6 +128,9 @@ or the closing tag `</em>' or `</strong>'."
      do (case (aref src i)
           (#\& (setq i (unesc-amp src dst (1+ i))))
           (#\< (setq i (unesc-lt src dst (1+ i) end)))
+          ((#\_ #\*)
+           (format dst "\\~C" (aref src i))
+           (incf i))
           (otherwise
            (princ (aref src i) dst)
            (incf i)))))
