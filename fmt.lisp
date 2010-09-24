@@ -58,7 +58,8 @@ to DST."
 
 (defun scan-tag (tag src start end)
   "Return the position in the string SRC immediately after the closing
-tag corresponding to TAG while maintaining balanced tags."
+tag corresponding to TAG while maintaining balanced tags or END if
+these conditions are not met."
   (do ((i start)                        ; position in src
        (ntag 1)                         ; number opening tags
        (ltag (format nil "^<~A>" tag))
