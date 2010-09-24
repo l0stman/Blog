@@ -23,6 +23,29 @@ and after the above transformations."
     "Transform the ASCII string to HTML by escaping characters."
     (escape-string s))
 
+(defun esc-html (src)
+  "Escape all special HTML characters in the string SRC."
+  (with-output-to-string (dst)
+    (loop
+       with i = 0
+       while (< i (length src))
+       do (let ((delta 1))
+            (case (aref src i)
+              ((#\<) (princ "&lt;" dst))
+              ((#\>) (princ "&gt;" dst))
+              ((#\') (princ "&#039;" dst))
+              ((#\&)
+               (multiple-value-bind (mstart mend)
+                   (scan "^#\\d{3};" src :start (1+ i))
+                 (if mstart             ; character entity?
+                     (progn
+                       (write-sequence src dst :start i :end mend)
+                       (setq delta (- mend i)))
+                     (princ "&amp;"))))
+              ((#\") (princ "&quot;" dst))
+              (otherwise (princ (aref src i) dst)))
+            (incf i delta)))))
+
 (deffmt out-fmt (s)
     "Transform back the HTML string to ASCII and unescape special characters."
   "&lt;" "<"
