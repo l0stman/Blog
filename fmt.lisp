@@ -55,6 +55,23 @@ to DST."
                             ,(iter (cdr clauses)))))))))
     (iter clauses)))
 
+(defun scan-tag (tag src start end)
+  "Return the position in the string SRC immediately after the closing
+tag corresponding to TAG while maintaining balanced tags."
+  (do ((i start)                        ; position in src
+       (ntag 1)                         ; number opening tags
+       (ltag (format nil "^<~A>" tag))
+       (rtag (format nil "^</~A>" tag)))
+      ((or (>= i end) (zerop ntag)) i)
+    (case-match (src :start i)
+      (ltag
+       (incf ntag)
+       (setq i match-end))
+      (rtag
+       (decf ntag)
+       (setq i match-end))
+      (t (incf i)))))
+
 (defun unesc-html (src)
   "Transform back all special HTML characters to ASCII in the string SRC."
   (with-output-to-string (dst)
