@@ -11,6 +11,20 @@
 (declaim (inline specialp))
 (defun specialp (ch) (find ch "*_\\>"))
 
+(defmacro case-match ((src &key (start 0)) &body clauses)
+  (labels ((iter (clauses)
+             (when clauses
+               (let ((cl (car clauses)))
+                 (if (eq (car cl) t)
+                     `(progn ,@(cdr cl)) ; default statement
+                     `(multiple-value-bind (match-start match-end)
+                          (scan ,(car cl) ,src :start ,start)
+                        (declare (ignorable match-end))
+                        (if match-start
+                            (progn ,@(cdr cl))
+                            ,(iter (cdr clauses)))))))))
+    (iter clauses)))
+
 (defun esc-html (src dst &key (start 0) (end (length src)))
   "Escape all special HTML characters in the string SRC and write it
 to DST."
@@ -66,20 +80,6 @@ to DST."
                    (t (princ "&gt;" dst))))
             (otherwise (princ (aref src i) dst)))
           (incf i delta))))
-
-(defmacro case-match ((src &key (start 0)) &body clauses)
-  (labels ((iter (clauses)
-             (when clauses
-               (let ((cl (car clauses)))
-                 (if (eq (car cl) t)
-                     `(progn ,@(cdr cl)) ; default statement
-                     `(multiple-value-bind (match-start match-end)
-                          (scan ,(car cl) ,src :start ,start)
-                        (declare (ignorable match-end))
-                        (if match-start
-                            (progn ,@(cdr cl))
-                            ,(iter (cdr clauses)))))))))
-    (iter clauses)))
 
 (defun scan-tag (tag src start end)
   "Return the position in the string SRC immediately after the closing
