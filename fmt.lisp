@@ -41,7 +41,7 @@ and after the above transformations."
                      (progn
                        (write-sequence src dst :start i :end mend)
                        (setq delta (- mend i)))
-                     (princ "&amp;"))))
+                     (princ "&amp;" dst))))
               ((#\") (princ "&quot;" dst))
               (otherwise (princ (aref src i) dst)))
             (incf i delta)))))
