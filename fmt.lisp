@@ -73,37 +73,61 @@ tag corresponding to TAG while maintaining balanced tags."
        (setq i match-end))
       (t (incf i)))))
 
-(defun unesc-html (src)
+(defun unesc-html (src dst &key (start 0) (end (length src)))
   "Transform back all special HTML characters to ASCII in the string SRC."
-  (with-output-to-string (dst)
-    (loop
-       with i = 0
-       while (< i (length src))
-       do (if (char= (aref src i) #\&)
-              (case-match (src :start (1+ i))
-                ("^lt;"
-                 (princ #\< dst)
-                 (setq i match-end))
-                ("^gt;"
-                 (princ #\> dst)
-                 (setq i match-end))
-                ("^quot;"
-                 (princ #\" dst)
-                 (setq i match-end))
-                ("^amp;"
-                 (princ #\& dst)
-                 (setq i match-end))
-                ("^#039;"
-                 (princ #\' dst)
-                 (setq i match-end))
-                (t
-                 (princ #\& dst)
-                 (incf i)))
-              (progn
-               (princ (aref src i) dst)
-               (incf i))))))
+  (loop
+     with i = start
+     while (< i end)
+     do (case (aref src i)
+          (#\&
+           (case-match (src :start (1+ i))
+             ("^lt;"
+              (princ #\< dst)
+              (setq i match-end))
+             ("^gt;"
+              (princ #\> dst)
+              (setq i match-end))
+             ("^quot;"
+              (princ #\" dst)
+              (setq i match-end))
+             ("^amp;"
+              (princ #\& dst)
+              (setq i match-end))
+             ("^#039;"
+              (princ #\' dst)
+              (setq i match-end))
+             (t
+              (princ #\& dst)
+              (incf i))))
+          (#\<
+           (case-match (src :start (1+ i))
+             ("^em>"
+              (let ((pos (scan-tag "em" src (+ i 4) end)))
+                (princ #\_ dst)
+                (unesc-html src
+                            dst
+                            :start (+ i 4)
+                            :end (if (< pos end) (- pos 5) end))
+                (princ #\_ dst)
+                (setq i pos)))
+             ("^strong>"
+              (let ((pos (scan-tag "strong" src (+ i 8) end)))
+                (princ #\* dst)
+                (unesc-html src
+                            dst
+                            :start (+ i 8)
+                            :end (if (< pos end) (- pos 9) end))
+                (princ #\* dst)
+                (setq i pos)))
+             (t
+              (princ #\< dst)
+              (incf i))))
+          (otherwise
+           (princ (aref src i) dst)
+           (incf i)))))
 
 (defun out-fmt (s)
   "Transform back the HTML string to ASCII and unescape special characters."
-  (unesc-html s))
+  (with-output-to-string (d)
+    (unesc-html s d)))
 
