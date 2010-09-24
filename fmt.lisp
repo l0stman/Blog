@@ -3,11 +3,6 @@
 (defvar *eol* (coerce '(#\return #\newline) 'string))
 (defvar *emptyl* (concatenate 'string *eol* *eol*))
 
-(defun in-fmt (s)
-  "Transform the ASCII string to HTML by escaping characters."
-  (with-output-to-string (d)
-    (esc-html s d)))
-
 (declaim (inline specialp))
 (defun specialp (ch) (find ch "*_\\>"))
 
@@ -80,6 +75,11 @@ to DST."
                    (t (princ "&gt;" dst))))
             (otherwise (princ (aref src i) dst)))
           (incf i delta))))
+
+(defun in-fmt (s)
+  "Transform the ASCII string to HTML by escaping characters."
+  (with-output-to-string (d)
+    (esc-html s d)))
 
 (defun scan-tag (tag src start end)
   "Return the position in the string SRC immediately after the closing
