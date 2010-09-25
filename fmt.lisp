@@ -42,8 +42,8 @@ is written in the stream DST."
            (lambda (,src ,dst ,start ,end) ,@body))))
 
 (defun text->html (src dst start end)
-  "Transform the input string SRC between the positions START and END
-to HTML and write it to DST."
+  "Transform the input text string SRC between the positions START and
+END to HTML and write it to DST."
   (loop
      with i = start
      while (< i end)
@@ -167,21 +167,21 @@ tag in any or after the bracket."
      (multiple-value-bind (after before)
          (scan-tag "em" src match-end end)
        (princ #\_ dst)
-       (unesc-html src dst match-end (or before end))
+       (html->text src dst match-end (or before end))
        (princ #\_ dst)
        (or after end)))
     ("^strong>"
      (multiple-value-bind (after before)
          (scan-tag "strong" src match-end end)
        (princ #\* dst)
-       (unesc-html src dst match-end (or before end))
+       (html->text src dst match-end (or before end))
        (princ #\* dst)
        (or after end)))
     ("^blockquote>"
      (multiple-value-bind (after before)
          (scan-tag "blockquote" src match-end end)
        (princ #\> dst)
-       (unesc-html src dst match-end (or before end))
+       (html->text src dst match-end (or before end))
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
@@ -189,8 +189,9 @@ tag in any or after the bracket."
      (princ #\< dst)
      start)))
 
-(defun unesc-html (src dst start end)
-  "Transform back all special HTML characters to ASCII in the string SRC."
+(defun html->text (src dst start end)
+  "Transform the input HTML string SRC between the positions START and
+END to ASCII text and write it to DST."
   (loop
      with i = start
      while (< i end)
@@ -207,4 +208,4 @@ tag in any or after the bracket."
 (defun out-fmt (s)
   "Transform back the HTML string to ASCII and unescape special characters."
   (with-output-to-string (d)
-    (unesc-html s d 0 (length s))))
+    (html->text s d 0 (length s))))
