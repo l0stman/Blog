@@ -20,9 +20,6 @@
 (defvar *syntax-table* (make-array 255 :initial-element NIL)
   "Table containing syntax handler for input text.")
 
-(defparameter *specials* nil
-  "List of special characters in the input text.")
-
 (defun sfunction (ch)
   "Return the syntax handler function corresponding to the character
 CH."
@@ -200,7 +197,7 @@ tag in any or after the bracket."
      do (case (aref src i)
           (#\& (setq i (unesc-amp src dst (1+ i) end)))
           (#\< (setq i (unesc-lt src dst (1+ i) end)))
-          (#.*specials*
+          ((#\& #\< #\_ #\* #\> #\' #\" #\')
            (format dst "\\~C" (aref src i))
            (incf i))
           (otherwise
