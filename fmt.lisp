@@ -127,7 +127,7 @@ END to HTML and write it to DST."
 
 (defsyn #\[ (src dst start end)
   (case-match (src (1+ start) end)
-    ("^([^]]+)\\]\\(([^)]+)\\)"         ; [link](url)?
+    ("^(.+)\\]\\((.+)\\)"         ; [link](url)?
      (princ "<a href=\"" dst)
      (write-sequence src
                      dst
