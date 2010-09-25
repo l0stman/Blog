@@ -148,8 +148,8 @@ tags or NIL if these conditions are not met."
 
 (defun amp->text (src dst start end)
   "Transform the HTML string SRC between START and END after an
-  ampersand and write the result to DST. Return the position
-  immediately after the HTML entity."
+ampersand and write the result to DST. Return the position
+immediately after the HTML entity."
   (case-match (src start end)
     ("^lt;" (princ #\< dst) match-end)
     ("^gt;" (princ #\> dst) match-end)
@@ -158,10 +158,10 @@ tags or NIL if these conditions are not met."
     ("^#039;" (princ #\' dst) match-end)
     (t (princ #\& dst) start)))
 
-(defun unesc-lt (src dst start end)
-  "Unescape the HTML string SRC after a left angle bracket and write
-the result to DST.  Return the position immediately after the closing
-tag in any or after the bracket."
+(defun lt->text (src dst start end)
+  "Transform the HTML string SRC between START and END after a left
+angle bracket and write the result to DST.  Return the position
+immediately after the closing tag in any or after the bracket."
   (case-match (src start end)
     ("^em>"
      (multiple-value-bind (after before)
@@ -198,7 +198,7 @@ END to ASCII text and write it to DST."
      do (let ((c (aref src i)))
           (case c
             (#\& (setq i (amp->text src dst (1+ i) end)))
-            (#\< (setq i (unesc-lt src dst (1+ i) end)))
+            (#\< (setq i (lt->text src dst (1+ i) end)))
             (otherwise
              (if (sfunction c)
                  (format dst "\\~C" c)
