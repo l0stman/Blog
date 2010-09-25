@@ -146,10 +146,10 @@ tags or NIL if these conditions are not met."
        (setq i match-end))
       (t (incf i)))))
 
-(defun unesc-amp (src dst start end)
-  "Unescape the HTML string SRC after an ampersand and write the
-  result to DST. Return the position immediately after the HTML
-  entity."
+(defun amp->text (src dst start end)
+  "Transform the HTML string SRC between START and END after an
+  ampersand and write the result to DST. Return the position
+  immediately after the HTML entity."
   (case-match (src start end)
     ("^lt;" (princ #\< dst) match-end)
     ("^gt;" (princ #\> dst) match-end)
@@ -197,7 +197,7 @@ END to ASCII text and write it to DST."
      while (< i end)
      do (let ((c (aref src i)))
           (case c
-            (#\& (setq i (unesc-amp src dst (1+ i) end)))
+            (#\& (setq i (amp->text src dst (1+ i) end)))
             (#\< (setq i (unesc-lt src dst (1+ i) end)))
             (otherwise
              (if (sfunction c)
