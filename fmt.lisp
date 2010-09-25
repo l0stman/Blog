@@ -87,15 +87,15 @@ tag corresponding to TAG while maintaining balanced tags or NIL if
 these conditions are not met."
   (do ((i start)                        ; position in src
        (ntag 1)                         ; number opening tags
-       (ltag (format nil "^<~A>" tag))
-       (rtag (format nil "^</~A>" tag)))
+       (lanchor (format nil "^<~A>" tag))
+       (ranchor (format nil "^</~A>" tag)))
       ((or (>= i end) (zerop ntag))
        (when (zerop ntag) i))
     (case-match (src :start i)
-      (ltag
+      (lanchor
        (incf ntag)
        (setq i match-end))
-      (rtag
+      (ranchor
        (decf ntag)
        (setq i match-end))
       (t (incf i)))))
