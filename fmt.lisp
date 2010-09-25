@@ -200,7 +200,7 @@ END to ASCII text and write it to DST."
             (#\& (setq i (amp->text src dst (1+ i) end)))
             (#\< (setq i (lt->text src dst (1+ i) end)))
             (otherwise
-             (if (sfunction c)
+             (if (sfunction c)          ; special character?
                  (format dst "\\~C" c)
                  (princ c dst))
              (incf i))))))
