@@ -20,6 +20,28 @@
                             ,(iter (cdr clauses)))))))))
     (iter clauses)))
 
+(defvar *esc-table* (make-array 255 :initial-element NIL))
+
+(defun esc-function (ch)
+  "Return the escape function corresponding to the character CH."
+  (let ((c (char-code ch)))
+    (when (< c (length *esc-table*))
+      (aref *esc-table* c))))
+
+(defmacro defesc (char (src dst start end) &body body)
+  "Define the procedure of four arguments SRC, DST, START and END and
+whose body is BODY as the escape function associated with CHAR.  That
+procedure should be called when we encounter the character CHAR and
+the position after the last processed character should be returned.
+The input text is the substring of SRC between the positions START and
+END (CHAR is at the position START.)  The result is written in the
+stream DST."
+  (let ((code (char-code char)))
+    (unless (< code (length *esc-table*))
+      (error "couldn't associate a function escape with ~C" char))
+    `(setf (aref *esc-table* ,code)
+           (lambda (,src ,dst ,start ,end) ,@body))))
+
 (defun esc-html (src dst &key (start 0) (end (length src)))
   "Escape all special HTML characters in the string SRC and write it
 to DST."
