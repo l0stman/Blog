@@ -3,12 +3,6 @@
 (defvar *eol* (coerce '(#\return #\newline) 'string))
 (defvar *emptyl* (concatenate 'string *eol* *eol*))
 
-(defparameter *specials* nil
-  "List of special characters in the input text.")
-
-(declaim (inline specialp))
-(defun specialp (ch) (find ch *specials*))
-
 (defmacro case-match ((src start end) &body clauses)
   (labels ((iter (clauses)
              (when clauses
@@ -25,6 +19,9 @@
 
 (defvar *syntax-table* (make-array 255 :initial-element NIL)
   "Table containing syntax handler for input text.")
+
+(defparameter *specials* nil
+  "List of special characters in the input text.")
 
 (defun sfunction (ch)
   "Return the syntax handler function corresponding to the character
@@ -101,7 +98,7 @@ positions START and END and write it to DST."
 
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
-    (cond ((and (< i end) (specialp (aref src i))) ; escape a special character?
+    (cond ((and (< i end) (sfunction (aref src i))) ; special character?
            (princ (aref src i) dst)
            (1+ i))
           (t (princ #\\ dst) i))))
