@@ -3,8 +3,11 @@
 (defvar *eol* (coerce '(#\return #\newline) 'string))
 (defvar *emptyl* (concatenate 'string *eol* *eol*))
 
+(defvar *specials* '(#\* #\_ #\\ #\>)
+  "Special characters in the input text.")
+
 (declaim (inline specialp))
-(defun specialp (ch) (find ch "*_\\>"))
+(defun specialp (ch) (find ch *specials*))
 
 (defmacro case-match ((src start end) &body clauses)
   (labels ((iter (clauses)
@@ -198,7 +201,7 @@ tag in any or after the bracket."
      do (case (aref src i)
           (#\& (setq i (unesc-amp src dst (1+ i) end)))
           (#\< (setq i (unesc-lt src dst (1+ i) end)))
-          ((#\_ #\* #\\ #\>)
+          (#.*specials*
            (format dst "\\~C" (aref src i))
            (incf i))
           (otherwise
