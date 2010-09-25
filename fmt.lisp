@@ -118,20 +118,20 @@ the result to DST.  Return the position immediately after the bracket
 or the closing tag `</em>' or `</strong>'."
   (case-match (src :start start)
     ("^em>"
-     (let ((pos (scan-tag "em" src (+ start 3) end)))
+     (let ((pos (scan-tag "em" src match-end end)))
        (princ #\_ dst)
        (unesc-html src
                    dst
-                   :start (+ start 3)
+                   :start match-end
                    :end (if pos (- pos 5) end))
        (princ #\_ dst)
        (or pos end)))
     ("^strong>"
-     (let ((pos (scan-tag "strong" src (+ start 7) end)))
+     (let ((pos (scan-tag "strong" src match-end end)))
        (princ #\* dst)
        (unesc-html src
                    dst
-                   :start (+ start 7)
+                   :start mach-end
                    :end (if pos (- pos 9) end))
        (princ #\* dst)
        (or pos end)))
