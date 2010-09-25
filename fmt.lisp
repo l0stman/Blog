@@ -194,15 +194,15 @@ tag in any or after the bracket."
   (loop
      with i = start
      while (< i end)
-     do (case (aref src i)
-          (#\& (setq i (unesc-amp src dst (1+ i) end)))
-          (#\< (setq i (unesc-lt src dst (1+ i) end)))
-          ((#\& #\< #\_ #\* #\> #\' #\" #\')
-           (format dst "\\~C" (aref src i))
-           (incf i))
-          (otherwise
-           (princ (aref src i) dst)
-           (incf i)))))
+     do (let ((c (aref src i)))
+          (case c
+            (#\& (setq i (unesc-amp src dst (1+ i) end)))
+            (#\< (setq i (unesc-lt src dst (1+ i) end)))
+            (otherwise
+             (if (sfunction c)
+                 (format dst "\\~C" c)
+                 (princ c dst))
+             (incf i))))))
 
 (defun out-fmt (s)
   "Transform back the HTML string to ASCII and unescape special characters."
