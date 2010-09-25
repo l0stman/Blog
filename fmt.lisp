@@ -122,7 +122,7 @@ to HTML and write it to DST."
          (1+ start))))
 
 (defun in-fmt (s)
-  "Transform the ASCII string to HTML by escaping characters."
+  "Transform the input text string to HTML."
   (with-output-to-string (d)
     (text->html s d 0 (length s))))
 
