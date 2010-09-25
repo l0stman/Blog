@@ -18,7 +18,7 @@
     (iter clauses)))
 
 (defvar *syntax-table* (make-array 255 :initial-element NIL)
-  "Table containing syntax handler for input text.")
+  "Table containing syntax handler functions for input text.")
 
 (defun sfunction (ch)
   "Return the syntax handler function corresponding to the character
