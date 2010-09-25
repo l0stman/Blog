@@ -56,6 +56,11 @@ END to HTML and write it to DST."
                (princ (aref src i) dst)
                (incf i)))))
 
+(defun in-fmt (s)
+  "Transform the input text string to HTML."
+  (with-output-to-string (d)
+    (text->html s d 0 (length s))))
+
 (defsyn #\< (src dst start end)
   (declare (ignore src end))
   (princ "&lt;" dst)
@@ -139,11 +144,6 @@ END to HTML and write it to DST."
     (t
      (princ #\[ dst)
      (1+ start))))
-
-(defun in-fmt (s)
-  "Transform the input text string to HTML."
-  (with-output-to-string (d)
-    (text->html s d 0 (length s))))
 
 (defun scan-tag (tag src start end)
   "Return the positions in the string SRC immediately after and before
