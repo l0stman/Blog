@@ -82,15 +82,16 @@ to DST."
     (esc-html s d)))
 
 (defun scan-tag (tag src start end)
-  "Return the position in the string SRC immediately after the closing
-tag corresponding to TAG while maintaining balanced tags or NIL if
-these conditions are not met."
+  "Return the positions in the string SRC immediately after and before
+the closing tag corresponding to TAG while maintaining balanced
+tags or NIL if these conditions are not met."
   (do ((i start)                        ; position in src
        (ntag 1)                         ; number opening tags
        (lanchor (format nil "^<~A>" tag))
        (ranchor (format nil "^</~A>" tag)))
       ((or (>= i end) (zerop ntag))
-       (when (zerop ntag) i))
+       (when (zerop ntag)
+         (values i (- i (length tag) 3))))
     (case-match (src :start i)
       (lanchor
        (incf ntag)
@@ -131,7 +132,7 @@ or the closing tag `</em>' or `</strong>'."
        (princ #\* dst)
        (unesc-html src
                    dst
-                   :start mach-end
+                   :start match-end
                    :end (if pos (- pos 9) end))
        (princ #\* dst)
        (or pos end)))
