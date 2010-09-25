@@ -42,6 +42,18 @@ stream DST."
     `(setf (aref *esc-table* ,code)
            (lambda (,src ,dst ,start ,end) ,@body))))
 
+(defun esc-html (src dst start end)
+  "Escape all special HTML characters in the string SRC between the
+positions START and END and write it to DST."
+  (loop
+     with i = start
+     while (< i end)
+     do (aif (esc-function (aref src i))
+             (setq i (funcall it src dst i end))
+             (progn
+               (princ (aref src i) dst)
+               (incf i)))))
+
 (defesc #\< (src dst start end)
   (declare (ignore src end))
   (princ "&lt;" dst)
@@ -109,18 +121,6 @@ stream DST."
         (t
          (princ "&gt;" dst)
          (1+ start))))
-
-(defun esc-html (src dst start end)
-  "Escape all special HTML characters in the string SRC between the
-positions START and END and write it to DST."
-  (loop
-     with i = start
-     while (< i end)
-     do (aif (esc-function (aref src i))
-             (setq i (funcall it src dst i end))
-             (progn
-               (princ (aref src i) dst)
-               (incf i)))))
 
 (defun in-fmt (s)
   "Transform the ASCII string to HTML by escaping characters."
