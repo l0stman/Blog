@@ -31,13 +31,11 @@ to DST."
             (#\< (princ "&lt;" dst))
             (#\' (princ "&#039;" dst))
             (#\&
-             (multiple-value-bind (mstart mend)
-                 (scan "^#\\d{3};" src :start (1+ i))
-               (if mstart               ; character entity?
-                   (progn
-                     (write-sequence src dst :start i :end mend)
-                     (setq delta (- mend i)))
-                   (princ "&amp;" dst))))
+             (case-match (src :start (1+ i))
+               ("^#\\d{3};"             ; character entity?
+                (write-sequence src dst :start i :end match-end)
+                (setq delta (- match-end i)))
+               (t (princ "&amp;" dst))))
             (#\" (princ "&quot;" dst))
             (#\_
              (let ((pos (or (position #\_ src :start (1+ i) :end end) end)))
