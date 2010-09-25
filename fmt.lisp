@@ -3,8 +3,8 @@
 (defvar *eol* (coerce '(#\return #\newline) 'string))
 (defvar *emptyl* (concatenate 'string *eol* *eol*))
 
-(defvar *specials* '(#\* #\_ #\\ #\>)
-  "Special characters in the input text.")
+(defparameter *specials* nil
+  "List of special characters in the input text.")
 
 (declaim (inline specialp))
 (defun specialp (ch) (find ch *specials*))
@@ -53,7 +53,7 @@ positions START and END and write it to DST."
   (loop
      with i = start
      while (< i end)
-     do (aif (esc-function (aref src i))
+     do (aif (sfunction (aref src i))
              (setq i (funcall it src dst i end))
              (progn
                (princ (aref src i) dst)
