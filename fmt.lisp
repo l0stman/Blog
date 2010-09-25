@@ -42,59 +42,85 @@ stream DST."
     `(setf (aref *esc-table* ,code)
            (lambda (,src ,dst ,start ,end) ,@body))))
 
+(defesc #\< (src dst start end)
+  (declare (ignore src end))
+  (princ "&lt;" dst)
+  (1+ start))
+
+(defesc #\' (src dst start end)
+  (declare (ignore src end))
+  (princ "&#039;" dst)
+  (1+ start))
+
+(defesc #\& (src dst start end)
+  (case-match (src (1+ start) end)
+    ("^#\\d{3};"                        ; character entity?
+     (write-sequence src dst :start start :end match-end)
+     match-end)
+    (t
+     (princ "&amp;" dst)
+     (1+ start))))
+
+(defesc #\" (src dst start end)
+  (declare (ignore src end))
+  (princ "&quot;" dst)
+  (1+ start))
+
+(defesc #\_ (src dst start end)
+  (let ((pos (or (position #\_ src :start (1+ start) :end end)
+                 end)))
+    (princ "<em>" dst)
+    (esc-html src dst (1+ start) pos)
+    (princ "</em>" dst)
+    (1+ pos)))
+
+(defesc #\* (src dst start end)
+  (let ((pos (or (position #\* src :start (1+ start) :end end)
+                 end)))
+    (princ "<strong>" dst)
+    (esc-html src dst (1+ start) pos)
+    (princ "</strong>" dst)
+    (1+ pos)))
+
+(defesc #\\ (src dst start end)
+  (let ((i (1+ start)))
+    (cond ((and (< i end) (specialp (aref src i))) ; escape a special character?
+           (princ (aref src i) dst)
+           (1+ i))
+          (t (princ #\\ dst) i))))
+
+(defesc #\> (src dst start end)
+  (cond ((or (zerop start)              ; beginning of string?
+             (and (> start 1)           ; after any empty line?
+                  (string= *emptyl*
+                           src
+                           :start2 (- start (length *emptyl*))
+                           :end2 start)))
+         (princ "<blockquote>" dst)
+         (case-match (src (1+ start) end)
+           ("(\\r\\n){2,}"              ; empty line?
+            (esc-html src dst (1+ start) (1- match-start))
+            (princ "</blockquote>" dst)
+            match-end)
+           (t
+            (write-sequence src dst :start (1+ start) :end end)
+            (princ "</blockquote>" dst)
+            end)))
+        (t
+         (princ "&gt;" dst)
+         (1+ start))))
+
 (defun esc-html (src dst start end)
-  "Escape all special HTML characters in the string SRC and write it
-to DST."
+  "Escape all special HTML characters in the string SRC between the
+positions START and END and write it to DST."
   (loop
      with i = start
      while (< i end)
-     do (let ((delta 1))
-          (case (aref src i)
-            (#\< (princ "&lt;" dst))
-            (#\' (princ "&#039;" dst))
-            (#\&
-             (case-match (src (1+ i) end)
-               ("^#\\d{3};"             ; character entity?
-                (write-sequence src dst :start i :end match-end)
-                (setq delta (- match-end i)))
-               (t (princ "&amp;" dst))))
-            (#\" (princ "&quot;" dst))
-            (#\_
-             (let ((pos (or (position #\_ src :start (1+ i) :end end) end)))
-               (princ "<em>" dst)
-               (esc-html src dst (1+ i) pos)
-               (princ "</em>" dst)
-               (setq delta (- (1+ pos) i))))
-            (#\*
-             (let ((pos (or (position #\* src :start (1+ i) :end end) end)))
-               (princ "<strong>" dst)
-               (esc-html src dst (1+ i) pos)
-               (princ "</strong>" dst)
-               (setq delta (- (1+ pos) i))))
-            (#\\
-             (cond ((and (< (1+ i) end) (specialp (aref src (1+ i))))
-                    (princ (aref src (1+ i)) dst)
-                    (setq delta 2))
-                   (t (princ #\\ dst))))
-            (#\>
-             (cond ((or (zerop i)
-                        (and (> i 1)
-                             (string= *emptyl*
-                                      src
-                                      :start2 (- i (length *emptyl*))
-                                      :end2 i)))
-                    (princ "<blockquote>" dst)
-                    (case-match (src (1+ i) end)
-                      ("(\\r\\n){2,}"
-                       (esc-html src dst (1+ i) (1- match-start))
-                       (setq delta (- match-end i)))
-                      (t
-                       (write-sequence src dst :start (1+ i) :end end)
-                       (setq delta (- end i))))
-                    (princ "</blockquote>" dst))
-                   (t (princ "&gt;" dst))))
-            (otherwise (princ (aref src i) dst)))
-          (incf i delta))))
+     do (aif (esc-function (aref src i))
+             (setq i (funcall it src dst i end))
+             (progn
+               (princ (aref src i) dst)
+               (incf i)))))
 
 (defun in-fmt (s)
   "Transform the ASCII string to HTML by escaping characters."
