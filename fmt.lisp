@@ -78,7 +78,7 @@ to HTML and write it to DST."
   (1+ start))
 
 (declaim (inline esc-symc))
-(defun esc-symc (c ltag rtag)
+(defun del->html (c ltag rtag)
   (lambda (src dst start end)
     (let ((pos (or (position c src :start (1+ start) :end end)
                    end)))
@@ -88,10 +88,10 @@ to HTML and write it to DST."
       (1+ pos))))
 
 (defsyn #\_ (src dst start end)
-  (funcall (esc-symc #\_ "<em>" "</em>") src dst start end))
+  (funcall (del->html #\_ "<em>" "</em>") src dst start end))
 
 (defsyn #\* (src dst start end)
-  (funcall (esc-symc #\* "<strong>" "</strong>") src dst start end))
+  (funcall (del->html #\* "<strong>" "</strong>") src dst start end))
 
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
