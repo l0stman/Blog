@@ -124,6 +124,22 @@ END to HTML and write it to DST."
          (princ "&gt;" dst)
          (1+ start))))
 
+(defsyn #\[ (src dst start end)
+  (case-match (src (1+ start) end)
+    ("^([^]]+)\\]\\(([^)]+)\\)"         ; [link](url)?
+     (princ "<a href=\"" dst)
+     (write-sequence src
+                     dst
+                     :start (aref reg-starts 1)
+                     :end (aref reg-ends 1))
+     (princ "\">" dst)
+     (text->html src dst (aref reg-starts 0) (aref reg-ends 0))
+     (princ "</a>" dst)
+     match-end)
+    (t
+     (princ #\[ dst)
+     (1+ start))))
+
 (defun in-fmt (s)
   "Transform the input text string to HTML."
   (with-output-to-string (d)
