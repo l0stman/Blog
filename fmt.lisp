@@ -77,7 +77,7 @@ END to HTML and write it to DST."
   (princ "&quot;" dst)
   (1+ start))
 
-(declaim (inline esc-symc))
+(declaim (inline del->html))
 (defun del->html (c ltag rtag)
   (lambda (src dst start end)
     (let ((pos (or (position c src :start (1+ start) :end end)
