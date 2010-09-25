@@ -41,10 +41,8 @@ is written in the stream DST."
   (let ((code (char-code char)))
     (unless (< code (length *syntax-table*))
       (error "couldn't associate a function escape with ~C" char))
-    `(progn
-       (setf (aref *syntax-table* ,code)
-             (lambda (,src ,dst ,start ,end) ,@body))
-       (pushnew ch *specials*))))
+    `(setf (aref *syntax-table* ,code)
+           (lambda (,src ,dst ,start ,end) ,@body))))
 
 (defun esc-html (src dst start end)
   "Escape all special HTML characters in the string SRC between the
