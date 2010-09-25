@@ -6,14 +6,14 @@
 (declaim (inline specialp))
 (defun specialp (ch) (find ch "*_\\>"))
 
-(defmacro case-match ((src &key (start 0)) &body clauses)
+(defmacro case-match ((src start end) &body clauses)
   (labels ((iter (clauses)
              (when clauses
                (let ((cl (car clauses)))
                  (if (eq (car cl) t)
                      `(progn ,@(cdr cl)) ; default statement
                      `(multiple-value-bind (match-start match-end)
-                          (scan ,(car cl) ,src :start ,start)
+                          (scan ,(car cl) ,src :start ,start :end ,end)
                         (declare (ignorable match-end))
                         (if match-start
                             (progn ,@(cdr cl))
@@ -53,7 +53,7 @@ to DST."
             (#\< (princ "&lt;" dst))
             (#\' (princ "&#039;" dst))
             (#\&
-             (case-match (src :start (1+ i))
+             (case-match (src (1+ i) end)
                ("^#\\d{3};"             ; character entity?
                 (write-sequence src dst :start i :end match-end)
                 (setq delta (- match-end i)))
@@ -84,7 +84,7 @@ to DST."
                                       :start2 (- i (length *emptyl*))
                                       :end2 i)))
                     (princ "<blockquote>" dst)
-                    (case-match (src :start (1+ i))
+                    (case-match (src (1+ i) end)
                       ("(\\r\\n){2,}"
                        (esc-html src dst :start (1+ i) :end (1- match-start))
                        (setq delta (- match-end i)))
@@ -112,7 +112,7 @@ tags or NIL if these conditions are not met."
       ((or (>= i end) (zerop ntag))
        (when (zerop ntag)
          (values i (- i (length tag) 3))))
-    (case-match (src :start i)
+    (case-match (src i end)
       (lanchor
        (incf ntag)
        (setq i match-end))
@@ -121,11 +121,11 @@ tags or NIL if these conditions are not met."
        (setq i match-end))
       (t (incf i)))))
 
-(defun unesc-amp (src dst start)
+(defun unesc-amp (src dst start end)
   "Unescape the HTML string SRC after an ampersand and write the
   result to DST. Return the position immediately after the HTML
   entity."
-  (case-match (src :start start)
+  (case-match (src start end)
     ("^lt;" (princ #\< dst) match-end)
     ("^gt;" (princ #\> dst) match-end)
     ("^quot;" (princ #\" dst) match-end)
@@ -137,7 +137,7 @@ tags or NIL if these conditions are not met."
   "Unescape the HTML string SRC after a left angle bracket and write
 the result to DST.  Return the position immediately after the closing
 tag in any or after the bracket."
-  (case-match (src :start start)
+  (case-match (src start end)
     ("^em>"
      (multiple-value-bind (after before)
          (scan-tag "em" src match-end end)
@@ -179,7 +179,7 @@ tag in any or after the bracket."
      with i = start
      while (< i end)
      do (case (aref src i)
-          (#\& (setq i (unesc-amp src dst (1+ i))))
+          (#\& (setq i (unesc-amp src dst (1+ i) end)))
           (#\< (setq i (unesc-lt src dst (1+ i) end)))
           ((#\_ #\* #\\ #\>)
            (format dst "\\~C" (aref src i))
