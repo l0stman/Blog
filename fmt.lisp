@@ -9,9 +9,12 @@
                (let ((cl (car clauses)))
                  (if (eq (car cl) t)
                      `(progn ,@(cdr cl)) ; default statement
-                     `(multiple-value-bind (match-start match-end)
+                     `(multiple-value-bind (match-start
+                                            match-end
+                                            reg-starts
+                                            reg-ends)
                           (scan ,(car cl) ,src :start ,start :end ,end)
-                        (declare (ignorable match-end))
+                        (declare (ignorable match-end reg-starts reg-ends))
                         (if match-start
                             (progn ,@(cdr cl))
                             ,(iter (cdr clauses)))))))))
