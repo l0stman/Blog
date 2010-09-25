@@ -33,14 +33,14 @@ CH."
     (when (< c (length *syntax-table*))
       (aref *syntax-table* c))))
 
-(defmacro defesc (char (src dst start end) &body body)
+(defmacro defsyn (char (src dst start end) &body body)
   "Define the procedure of four arguments SRC, DST, START and END and
-whose body is BODY as the escape function associated with CHAR.  That
-procedure should be called when we encounter the character CHAR and
-the position after the last processed character should be returned.
-The input text is the substring of SRC between the positions START and
-END (CHAR is at the position START.)  The result is written in the
-stream DST."
+whose body is BODY as the syntax handler function associated with
+CHAR.  That procedure should be called when we encounter the character
+CHAR and the position after the last processed character should be
+returned.  The input text is the substring of SRC between the
+positions START and END (CHAR is at the position START.)  The result
+is written in the stream DST."
   (let ((code (char-code char)))
     (unless (< code (length *syntax-table*))
       (error "couldn't associate a function escape with ~C" char))
@@ -59,17 +59,17 @@ positions START and END and write it to DST."
                (princ (aref src i) dst)
                (incf i)))))
 
-(defesc #\< (src dst start end)
+(defsyn #\< (src dst start end)
   (declare (ignore src end))
   (princ "&lt;" dst)
   (1+ start))
 
-(defesc #\' (src dst start end)
+(defsyn #\' (src dst start end)
   (declare (ignore src end))
   (princ "&#039;" dst)
   (1+ start))
 
-(defesc #\& (src dst start end)
+(defsyn #\& (src dst start end)
   (case-match (src (1+ start) end)
     ("^#\\d{3};"                        ; character entity?
      (write-sequence src dst :start start :end match-end)
@@ -78,7 +78,7 @@ positions START and END and write it to DST."
      (princ "&amp;" dst)
      (1+ start))))
 
-(defesc #\" (src dst start end)
+(defsyn #\" (src dst start end)
   (declare (ignore src end))
   (princ "&quot;" dst)
   (1+ start))
@@ -93,20 +93,20 @@ positions START and END and write it to DST."
       (princ rtag dst)
       (1+ pos))))
 
-(defesc #\_ (src dst start end)
+(defsyn #\_ (src dst start end)
   (funcall (esc-symc #\_ "<em>" "</em>") src dst start end))
 
-(defesc #\* (src dst start end)
+(defsyn #\* (src dst start end)
   (funcall (esc-symc #\* "<strong>" "</strong>") src dst start end))
 
-(defesc #\\ (src dst start end)
+(defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
     (cond ((and (< i end) (specialp (aref src i))) ; escape a special character?
            (princ (aref src i) dst)
            (1+ i))
           (t (princ #\\ dst) i))))
 
-(defesc #\> (src dst start end)
+(defsyn #\> (src dst start end)
   (cond ((or (zerop start)              ; beginning of string?
              (and (> start 1)           ; after any empty line?
                   (string= *emptyl*
