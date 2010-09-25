@@ -109,25 +109,21 @@ END to HTML and write it to DST."
           (t (princ #\\ dst) i))))
 
 (defsyn #\> (src dst start end)
-  (cond ((or (zerop start)              ; beginning of string?
-             (and (> start 1)           ; after any empty line?
-                  (string= *emptyl*
-                           src
-                           :start2 (- start (length *emptyl*))
-                           :end2 start)))
-         (princ "<blockquote>" dst)
-         (case-match (src (1+ start) end)
-           ("(\\r\\n){2,}"              ; empty line?
-            (text->html src dst (1+ start) (1- match-start))
-            (princ "</blockquote>" dst)
-            match-end)
-           (t
-            (write-sequence src dst :start (1+ start) :end end)
-            (princ "</blockquote>" dst)
-            end)))
-        (t
-         (princ "&gt;" dst)
-         (1+ start))))
+  (if (or (zerop start)                 ; beginning of string?
+          (and (> start 1)              ; after any empty line?
+               (string= *emptyl*
+                        src
+                        :start2 (- start (length *emptyl*))
+                        :end2 start)))
+      (multiple-value-bind (match-start match-end)
+          (scan "(\\r\\n){2,}" src :start (1+ start) :end end) ; empty line?
+        (princ "<blockquote>" dst)
+        (text->html src dst (1+ start) (or match-start end))
+        (princ "</blockquote>" dst)
+        (or match-end end))
+      (progn
+        (princ "&gt;" dst)
+        (1+ start))))
 
 (defsyn #\[ (src dst start end)
   (case-match (src (1+ start) end)
