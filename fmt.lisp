@@ -41,9 +41,9 @@ is written in the stream DST."
     `(setf (aref *syntax-table* ,code)
            (lambda (,src ,dst ,start ,end) ,@body))))
 
-(defun esc-html (src dst start end)
-  "Escape all special HTML characters in the string SRC between the
-positions START and END and write it to DST."
+(defun text->html (src dst start end)
+  "Transform the input string SRC between the positions START and END
+to HTML and write it to DST."
   (loop
      with i = start
      while (< i end)
@@ -83,7 +83,7 @@ positions START and END and write it to DST."
     (let ((pos (or (position c src :start (1+ start) :end end)
                    end)))
       (princ ltag dst)
-      (esc-html src dst (1+ start) pos)
+      (text->html src dst (1+ start) pos)
       (princ rtag dst)
       (1+ pos))))
 
@@ -110,7 +110,7 @@ positions START and END and write it to DST."
          (princ "<blockquote>" dst)
          (case-match (src (1+ start) end)
            ("(\\r\\n){2,}"              ; empty line?
-            (esc-html src dst (1+ start) (1- match-start))
+            (text->html src dst (1+ start) (1- match-start))
             (princ "</blockquote>" dst)
             match-end)
            (t
@@ -124,7 +124,7 @@ positions START and END and write it to DST."
 (defun in-fmt (s)
   "Transform the ASCII string to HTML by escaping characters."
   (with-output-to-string (d)
-    (esc-html s d 0 (length s))))
+    (text->html s d 0 (length s))))
 
 (defun scan-tag (tag src start end)
   "Return the positions in the string SRC immediately after and before
