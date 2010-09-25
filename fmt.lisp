@@ -115,8 +115,8 @@ tags or NIL if these conditions are not met."
 
 (defun unesc-lt (src dst start end)
   "Unescape the HTML string SRC after a left angle bracket and write
-the result to DST.  Return the position immediately after the bracket
-or the closing tag `</em>' or `</strong>'."
+the result to DST.  Return the position immediately after the closing
+tag in any or after the bracket."
   (case-match (src :start start)
     ("^em>"
      (multiple-value-bind (after before)
