@@ -23,13 +23,15 @@
                             ,(iter (cdr clauses)))))))))
     (iter clauses)))
 
-(defvar *esc-table* (make-array 255 :initial-element NIL))
+(defvar *syntax-table* (make-array 255 :initial-element NIL)
+  "Table containing syntax handler for input text.")
 
-(defun esc-function (ch)
-  "Return the escape function corresponding to the character CH."
+(defun sfunction (ch)
+  "Return the syntax handler function corresponding to the character
+CH."
   (let ((c (char-code ch)))
-    (when (< c (length *esc-table*))
-      (aref *esc-table* c))))
+    (when (< c (length *syntax-table*))
+      (aref *syntax-table* c))))
 
 (defmacro defesc (char (src dst start end) &body body)
   "Define the procedure of four arguments SRC, DST, START and END and
@@ -40,9 +42,9 @@ The input text is the substring of SRC between the positions START and
 END (CHAR is at the position START.)  The result is written in the
 stream DST."
   (let ((code (char-code char)))
-    (unless (< code (length *esc-table*))
+    (unless (< code (length *syntax-table*))
       (error "couldn't associate a function escape with ~C" char))
-    `(setf (aref *esc-table* ,code)
+    `(setf (aref *syntax-table* ,code)
            (lambda (,src ,dst ,start ,end) ,@body))))
 
 (defun esc-html (src dst start end)
