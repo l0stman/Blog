@@ -204,6 +204,18 @@ immediately after the closing tag in any or after the bracket."
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
+    ("^a href=\"([^\"]+)\">"
+     (multiple-value-bind (after before)
+         (scan-tag "a" src match-end end)
+       (princ #\[ dst)
+       (html->text src dst match-end (or before end))
+       (princ "](" dst)
+       (write-sequence src
+                       dst
+                       :start (aref reg-starts 0)
+                       :end (aref reg-ends 0))
+       (princ #\) dst)
+       (or after end)))
     (t
      (princ #\< dst)
      start)))
