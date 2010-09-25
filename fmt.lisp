@@ -206,6 +206,6 @@ END to ASCII text and write it to DST."
              (incf i))))))
 
 (defun out-fmt (s)
-  "Transform back the HTML string to ASCII and unescape special characters."
+  "Transform the input HTML string to ASCII."
   (with-output-to-string (d)
     (html->text s d 0 (length s))))
