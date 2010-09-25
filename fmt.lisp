@@ -37,7 +37,7 @@ positions START and END (CHAR is at the position START.)  The result
 is written in the stream DST."
   (let ((code (char-code char)))
     (unless (< code (length *syntax-table*))
-      (error "couldn't associate a function escape with ~C" char))
+      (error "couldn't associate a syntax function with ~C" char))
     `(setf (aref *syntax-table* ,code)
            (lambda (,src ,dst ,start ,end) ,@body))))
 
