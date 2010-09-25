@@ -42,7 +42,7 @@ stream DST."
     `(setf (aref *esc-table* ,code)
            (lambda (,src ,dst ,start ,end) ,@body))))
 
-(defun esc-html (src dst &key (start 0) (end (length src)))
+(defun esc-html (src dst start end)
   "Escape all special HTML characters in the string SRC and write it
 to DST."
   (loop
@@ -62,13 +62,13 @@ to DST."
             (#\_
              (let ((pos (or (position #\_ src :start (1+ i) :end end) end)))
                (princ "<em>" dst)
-               (esc-html src dst :start (1+ i) :end pos)
+               (esc-html src dst (1+ i) pos)
                (princ "</em>" dst)
                (setq delta (- (1+ pos) i))))
             (#\*
              (let ((pos (or (position #\* src :start (1+ i) :end end) end)))
                (princ "<strong>" dst)
-               (esc-html src dst :start (1+ i) :end pos)
+               (esc-html src dst (1+ i) pos)
                (princ "</strong>" dst)
                (setq delta (- (1+ pos) i))))
             (#\\
@@ -86,7 +86,7 @@ to DST."
                     (princ "<blockquote>" dst)
                     (case-match (src (1+ i) end)
                       ("(\\r\\n){2,}"
-                       (esc-html src dst :start (1+ i) :end (1- match-start))
+                       (esc-html src dst (1+ i) (1- match-start))
                        (setq delta (- match-end i)))
                       (t
                        (write-sequence src dst :start (1+ i) :end end)
@@ -99,7 +99,7 @@ to DST."
 (defun in-fmt (s)
   "Transform the ASCII string to HTML by escaping characters."
   (with-output-to-string (d)
-    (esc-html s d)))
+    (esc-html s d 0 (length s))))
 
 (defun scan-tag (tag src start end)
   "Return the positions in the string SRC immediately after and before
@@ -142,30 +142,21 @@ tag in any or after the bracket."
      (multiple-value-bind (after before)
          (scan-tag "em" src match-end end)
        (princ #\_ dst)
-       (unesc-html src
-                   dst
-                   :start match-end
-                   :end (or before end))
+       (unesc-html src dst match-end (or before end))
        (princ #\_ dst)
        (or after end)))
     ("^strong>"
      (multiple-value-bind (after before)
          (scan-tag "strong" src match-end end)
        (princ #\* dst)
-       (unesc-html src
-                   dst
-                   :start match-end
-                   :end (or before end))
+       (unesc-html src dst match-end (or before end))
        (princ #\* dst)
        (or after end)))
     ("^blockquote>"
      (multiple-value-bind (after before)
          (scan-tag "blockquote" src match-end end)
        (princ #\> dst)
-       (unesc-html src
-                   dst
-                   :start match-end
-                   :end (or before end))
+       (unesc-html src dst match-end (or before end))
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
@@ -173,7 +164,7 @@ tag in any or after the bracket."
      (princ #\< dst)
      start)))
 
-(defun unesc-html (src dst &key (start 0) (end (length src)))
+(defun unesc-html (src dst start end)
   "Transform back all special HTML characters to ASCII in the string SRC."
   (loop
      with i = start
@@ -191,4 +182,4 @@ tag in any or after the bracket."
 (defun out-fmt (s)
   "Transform back the HTML string to ASCII and unescape special characters."
   (with-output-to-string (d)
-    (unesc-html s d)))
+    (unesc-html s d 0 (length s))))
