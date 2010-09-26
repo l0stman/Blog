@@ -256,6 +256,14 @@ immediately after the closing tag in any or after the bracket."
                        :end (aref reg-ends 0))
        (princ #\) dst)
        (or after end)))
+    ("^p>"
+     (multiple-value-bind (after before)
+         (scan-tag "p" src match-end end)
+       (html->text src dst match-end (or before end))
+       (cond ((and after (< after end))
+              (princ *emptyl* dst)
+              after)
+             (t end))))
     (t
      (princ #\< dst)
      start)))
