@@ -20,8 +20,9 @@
                             ,(iter (cdr clauses)))))))))
     (iter clauses)))
 
-(defparameter *syntax-table* (make-array 255 :initial-element NIL)
-  "Table containing syntax handler functions for input text.")
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defparameter *syntax-table* (make-array 255 :initial-element NIL)
+    "Table containing syntax handler functions for input text."))
 
 (defun sfunction (ch)
   "Return the syntax handler function corresponding to the character
