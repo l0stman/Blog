@@ -20,7 +20,7 @@
                             ,(iter (cdr clauses)))))))))
     (iter clauses)))
 
-(defvar *syntax-table* (make-array 255 :initial-element NIL)
+(defparameter *syntax-table* (make-array 255 :initial-element NIL)
   "Table containing syntax handler functions for input text.")
 
 (defun sfunction (ch)
