@@ -90,16 +90,18 @@ END to HTML and write it to DST."
 LTAG<text>RTAG. <text> should be contained in one paragraph."
   (lambda (src dst start end)
     (let (pos next)
-      (do ((i (1+ start)))
+      (do ((llen (length *emptyl*))
+           (i (1+ start)))
           ((or (>= i end) (char= c (aref src i)))
            (setq pos i
                  next (if (>= i end) i (1+ i))))
-        (case-match (src i end)
-          ("^(\\r\\n){2,}"              ; end of paragraph?
-           (setq next i
-                 pos  i)
-           (return))
-          (t (incf i))))
+        (cond ((and (<= llen (- end i))
+                    (string= src *emptyl* :start1 i :end1 (+ i llen)))
+               ;; end of paragraph
+               (setq next i
+                     pos  i)
+               (return))
+              (t (incf i))))
       (princ ltag dst)
       (text->html src dst (1+ start) pos)
       (princ rtag dst)
