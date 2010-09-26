@@ -121,21 +121,22 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
           (t (princ #\\ dst) i))))
 
 (defsyn #\> (src dst start end)
-  (if (or (zerop start)                 ; beginning of string?
-          (and (> start 1)              ; after any empty line?
-               (string= *emptyl*
-                        src
-                        :start2 (- start (length *emptyl*))
-                        :end2 start)))
-      (multiple-value-bind (match-start match-end)
-          (scan "(\\r\\n){2,}" src :start (1+ start) :end end) ; empty line?
-        (princ "<blockquote>" dst)
-        (text->html src dst (1+ start) (or match-start end))
-        (princ "</blockquote>" dst)
-        (or match-end end))
-      (progn
-        (princ "&gt;" dst)
-        (1+ start))))
+  (let ((llen (length *emptyl*)))
+    (if (or (zerop start)               ; beginning of string?
+            (and (> start llen)         ; after any empty line?
+                 (string= *emptyl*
+                          src
+                          :start2 (- start llen)
+                          :end2 start)))
+        (multiple-value-bind (match-start match-end)
+            (scan "(\\r\\n){2,}" src :start (1+ start) :end end) ; empty line?
+          (princ "<blockquote>" dst)
+          (text->html src dst (1+ start) (or match-start end))
+          (princ "</blockquote>" dst)
+          (or match-end end))
+        (progn
+          (princ "&gt;" dst)
+          (1+ start)))))
 
 (defsyn #\[ (src dst start end)
   (case-match (src (1+ start) end)
