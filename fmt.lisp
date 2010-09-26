@@ -83,7 +83,11 @@ END to HTML and write it to DST."
 (defun in-fmt (s)
   "Transform the input text string to HTML."
   (with-output-to-string (d)
-    (text->html s d 0 (length s))))
+    (loop
+       with i = 0
+       with len = (length s)
+       while (< i len)
+       do (setq i (npgraph s d i len)))))
 
 (defsyn #\< (src dst start end)
   (declare (ignore src end))
