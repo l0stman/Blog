@@ -85,15 +85,25 @@ END to HTML and write it to DST."
   (princ "&quot;" dst)
   (1+ start))
 
-(declaim (inline del->html))
 (defun del->html (c ltag rtag)
+  "Return a syntax handler such that C<text>C is transformed into
+LTAG<text>RTAG. <text> should be contained in one paragraph."
   (lambda (src dst start end)
-    (let ((pos (or (position c src :start (1+ start) :end end)
-                   end)))
+    (let (pos next)
+      (do ((i (1+ start)))
+          ((or (>= i end) (char= c (aref src i)))
+           (setq pos i
+                 next (if (>= i end) i (1+ i))))
+        (case-match (src i end)
+          ("^(\\r\\n){2,}"              ; end of paragraph?
+           (setq next match-start
+                 pos  match-start)
+           (return))
+          (t (incf i))))
       (princ ltag dst)
       (text->html src dst (1+ start) pos)
       (princ rtag dst)
-      (1+ pos))))
+      next)))
 
 (defsyn #\_ (src dst start end)
   (funcall (del->html #\_ "<em>" "</em>") src dst start end))
