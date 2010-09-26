@@ -56,6 +56,29 @@ END to HTML and write it to DST."
                (princ (aref src i) dst)
                (incf i)))))
 
+(defun npgraph (src dst start end)
+  "Create a new HTML paragraph."
+  (if (< start end)
+      (multiple-value-bind (match-start match-end)
+          (scan "(\\r\\n){2,}" src :start start :end end)
+        (cond ((char= #\> (aref src start)) ; blockquote
+               (princ "<blockquote><p>" dst)
+               (let ((q (regex-replace-all "\\r\\n>"
+                                           src
+                                           ""
+                                           :start (1+ start)
+                                           :end (or match-start end))))
+                 (text->html q dst 0 (length q)))
+               (princ "</p></blockquote>" dst)
+               (if match-end
+                   (npgraph src dst match-end end)
+                   end))
+              (t
+               (princ "<p>" dst)        ; new paragraph
+               (text->html src dst start (or match-start end))
+               (or match-end end))))
+      end))
+
 (defun in-fmt (s)
   "Transform the input text string to HTML."
   (with-output-to-string (d)
@@ -64,6 +87,11 @@ END to HTML and write it to DST."
 (defsyn #\< (src dst start end)
   (declare (ignore src end))
   (princ "&lt;" dst)
+  (1+ start))
+
+(defsyn #\> (src dst start end)
+  (declare (ignore src end))
+  (princ "&gt;" dst)
   (1+ start))
 
 (defsyn #\' (src dst start end)
@@ -120,34 +148,14 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
            (1+ i))
           (t (princ #\\ dst) i))))
 
-(defsyn #\> (src dst start end)
-  (let ((llen (length *emptyl*)))
-    (if (or (zerop start)               ; beginning of string?
-            (and (> start llen)         ; after any empty line?
-                 (string= *emptyl*
-                          src
-                          :start2 (- start llen)
-                          :end2 start)))
-        (multiple-value-bind (match-start match-end)
-            (scan "(\\r\\n){2,}" src :start (1+ start) :end end) ; empty line?
-          (princ "<blockquote>" dst)
-          (text->html src dst (1+ start) (or match-start end))
-          (princ "</blockquote>" dst)
-          (or match-end end))
-        (progn
-          (princ "&gt;" dst)
-          (1+ start)))))
-
-(defun bquote->html (src dst start end)
-  "Syntax handler function for a blockquote."
-  (multiple-value-bind (match-start match-end)
-      (scan "(\\r\\n){2,}" src :start start :end end)
-    (princ "<blockquote>" dst)
-    (let ((q (regex-replace-all
-              "\\r\\n>" src "" :start start :end (or match-start end))))
-      (text->html q dst 0 (length q)))
-    (princ "</blockquote>" dst)
-    (or match-end end)))
+(defsyn #\return (src dst start end)
+  (case-match (src (1+ start) end)
+    ("^\\n(\\r\\n)+"                    ; empty line?
+     (princ "</p>" dst)
+     (npgraph src dst match-end end))
+    (t
+     (princ #\return dst)
+     (1+ start))))
 
 (defsyn #\[ (src dst start end)
   (case-match (src (1+ start) end)
