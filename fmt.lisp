@@ -271,7 +271,8 @@ END to ASCII text and write it to DST."
             (#\& (setq i (amp->text src dst (1+ i) end)))
             (#\< (setq i (lt->text src dst (1+ i) end)))
             (otherwise
-             (if (sfunction c)          ; special character?
+             (if (and (sfunction c)     ; special character?
+                      (char/= c #\return))
                  (format dst "\\~C" c)
                  (princ c dst))
              (incf i))))))
