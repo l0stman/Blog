@@ -183,7 +183,11 @@ immediately after the HTML entity."
     ("^gt;" (princ #\> dst) match-end)
     ("^quot;" (princ #\" dst) match-end)
     ("^amp;" (princ #\& dst) match-end)
-    ("^#039;" (princ #\' dst) match-end)
+    ("^#\\d{3};"                        ; character entity?
+     (princ (code-char
+             (parse-integer src :start (1+ start) :end (1- match-end)))
+            dst)
+     match-end)
     (t (princ #\& dst) start)))
 
 (defun lt->text (src dst start end)
