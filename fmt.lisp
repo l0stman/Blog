@@ -96,8 +96,8 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
                  next (if (>= i end) i (1+ i))))
         (case-match (src i end)
           ("^(\\r\\n){2,}"              ; end of paragraph?
-           (setq next match-start
-                 pos  match-start)
+           (setq next i
+                 pos  i)
            (return))
           (t (incf i))))
       (princ ltag dst)
