@@ -76,6 +76,7 @@ END to HTML and write it to DST."
               (t
                (princ "<p>" dst)        ; new paragraph
                (text->html src dst start (or match-start end))
+               (princ "</p>" dst)
                (or match-end end))))
       end))
 
