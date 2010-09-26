@@ -57,8 +57,10 @@ END to HTML and write it to DST."
                (princ (aref src i) dst)
                (incf i)))))
 
-(defun npgraph (src dst start end)
-  "Create a new HTML paragraph."
+(defun pgraph->html (src dst start end)
+  "Transform one or more paragraph from the input text string SRC
+between the positions START and END to HTML and write the result to
+DST."
   (if (< start end)
       (multiple-value-bind (match-start match-end)
           (scan "(\\r\\n){2,}" src :start start :end end)
@@ -72,7 +74,7 @@ END to HTML and write it to DST."
                  (text->html q dst 0 (length q)))
                (princ "</p></blockquote>" dst)
                (if match-end
-                   (npgraph src dst match-end end)
+                   (pgraph->html src dst match-end end)
                    end))
               (t
                (princ "<p>" dst)        ; new paragraph
@@ -88,7 +90,7 @@ END to HTML and write it to DST."
        with i = 0
        with len = (length s)
        while (< i len)
-       do (setq i (npgraph s d i len)))))
+       do (setq i (pgraph->html s d i len)))))
 
 (defsyn #\< (src dst start end)
   (declare (ignore src end))
@@ -158,7 +160,7 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
   (case-match (src (1+ start) end)
     ("^\\n(\\r\\n)+"                    ; empty line?
      (princ "</p>" dst)
-     (npgraph src dst match-end end))
+     (pgraph->html src dst match-end end))
     (t
      (princ #\return dst)
      (1+ start))))
