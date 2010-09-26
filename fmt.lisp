@@ -138,6 +138,17 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
           (princ "&gt;" dst)
           (1+ start)))))
 
+(defun bquote->html (src dst start end)
+  "Syntax handler function for a blockquote."
+  (multiple-value-bind (match-start match-end)
+      (scan "(\\r\\n){2,}" src :start start :end end)
+    (princ "<blockquote>" dst)
+    (let ((q (regex-replace-all
+              "\\r\\n>" src "" :start start :end (or match-start end))))
+      (text->html q dst 0 (length q)))
+    (princ "</blockquote>" dst)
+    (or match-end end)))
+
 (defsyn #\[ (src dst start end)
   (case-match (src (1+ start) end)
     ("^(.+)\\]\\((.+)\\)"         ; [link](url)?
