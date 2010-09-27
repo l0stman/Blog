@@ -72,18 +72,16 @@ END to HTML and write it to DST."
     (loop
        with i = start
        while (< i end)
-       do (multiple-value-bind (match-start match-end)
+       do (multiple-value-bind (mstart mend)
               (scan "&#\\d{3};" s :start i :end end)
-            (unless match-start
+            (unless mstart
               (write-sequence s d :start i :end end)
               (return))
-            (write-sequence s d :start i :end match-start)
+            (write-sequence s d :start i :end mstart)
             (princ (code-char
-                    (parse-integer s
-                                   :start (+ match-start 2)
-                                   :end (1- match-end)))
+                    (parse-integer s :start (+ mstart 2) :end (1- mend)))
                    d)
-            (setq i match-end)))))
+            (setq i mend)))))
 
 (defun pgraph->html (src dst start end)
   "Transform the paragraphs from the input text string SRC between the
