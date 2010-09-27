@@ -8,7 +8,7 @@
     :author "rrl <endian.sign@gmail.com>"
     :components ((:file "packages")
                  (:file "macros" :depends-on ("packages"))
-		 (:file "fmt" :depends-on ("packages"))
+		 (:file "fmt" :depends-on ("macros"))
 		 (:file "params" :depends-on ("fmt" "macros"))
 		 (:file "login" :depends-on ("macros"))
 		 (:file "verify" :depends-on ("login"))
