@@ -4,6 +4,18 @@
 (defvar *emptyl* (concatenate 'string *eol* *eol*))
 
 (defmacro case-match ((src start end) &body clauses)
+  "CASE-MATCH is a dispatcher like CASE that executes the forms in a
+clause if a condition is met.
+
+Each clause has the form:
+  \(RE STATEMENT*).
+
+STATEMENT* is executed sequentially if RE is equal to T or if the
+regex RE matches the string SRC by scanning between the positions
+START and END.  In this case the variables MATCH-START, MATCH-END,
+REG-STARTS and REG-ENDS are bound respectively to the positions of the
+start of the match and the end of the match, the arrays containing the
+start and end positions of the registers in RE."
   (labels ((iter (clauses)
              (when clauses
                (let ((cl (car clauses)))
