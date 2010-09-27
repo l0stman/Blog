@@ -60,44 +60,44 @@ END to HTML and write it to DST."
 (defun pgraph->html (src dst start end)
   "Transform the paragraphs from the input text string SRC between the
 positions START and END to HTML and write the result to DST."
-  (flet ((esc (s)                       ; escape all special characters
+  (flet ((esc (s)                      ; escape all special characters
            (with-output-to-string (d)
              (loop for ch across s
                 do (if (and (sfunction ch)
                             (char/= ch #\return))
                        (format d "&#~3,'0d;" (char-code ch))
                        (princ ch d))))))
-   (if (< start end)
-       (multiple-value-bind (match-start match-end)
-           (scan "(\\r\\n){2,}" src :start start :end end)
-         (cond ((char= #\> (char src start)) ; blockquote ?
-                (princ "<blockquote>" dst)
-                (let ((q (regex-replace-all "\\r\\n>"
-                                            src
-                                            *eol*
-                                            :start (1+ start)
-                                            :end (or match-start end))))
-                  (pgraph->html q dst 0 (length q)))
-                (princ "</blockquote>" dst))
-               ((let ((end2 (+ start 4))) ; code?
-                  (and (<= end2 end)
-                       (string= "    " src :start2 start :end2 end2)))
-                (princ "<pre><code>" dst)
-                (let ((c (regex-replace-all "\\r\\n {4}"
-                                            src
-                                            *eol*
-                                            :start (+ start 4)
-                                            :end (or match-start end))))
-                  (write-sequence (esc c) dst))
-                (princ "</code></pre>" dst))
-               (t
-                (princ "<p>" dst)       ; new paragraph
-                (text->html src dst start (or match-start end))
-                (princ "</p>" dst)))
-         (if match-end
-             (pgraph->html src dst match-end end)
-             end))
-       end)))
+    (if (< start end)
+        (multiple-value-bind (match-start match-end)
+            (scan "(\\r\\n){2,}" src :start start :end end)
+          (cond ((char= #\> (char src start)) ; blockquote ?
+                 (princ "<blockquote>" dst)
+                 (let ((q (regex-replace-all "\\r\\n>"
+                                             src
+                                             *eol*
+                                             :start (1+ start)
+                                             :end (or match-start end))))
+                   (pgraph->html q dst 0 (length q)))
+                 (princ "</blockquote>" dst))
+                ((let ((end2 (+ start 4))) ; code?
+                   (and (<= end2 end)
+                        (string= "    " src :start2 start :end2 end2)))
+                 (princ "<pre><code>" dst)
+                 (let ((c (regex-replace-all "\\r\\n {4}"
+                                             src
+                                             *eol*
+                                             :start (+ start 4)
+                                             :end (or match-start end))))
+                   (write-sequence (esc c) dst))
+                 (princ "</code></pre>" dst))
+                (t
+                 (princ "<p>" dst)      ; new paragraph
+                 (text->html src dst start (or match-start end))
+                 (princ "</p>" dst)))
+          (if match-end
+              (pgraph->html src dst match-end end)
+              end))
+        end)))
 
 (defun in-fmt (s)
   "Transform the input text string to HTML."
