@@ -63,7 +63,7 @@ positions START and END to HTML and write the result to DST."
   (if (< start end)
       (multiple-value-bind (match-start match-end)
           (scan "(\\r\\n){2,}" src :start start :end end)
-        (cond ((char= #\> (char src start)) ; blockquote
+        (cond ((char= #\> (char src start)) ; blockquote ?
                (princ "<blockquote>" dst)
                (let ((q (regex-replace-all "\\r\\n>"
                                            src
@@ -72,6 +72,17 @@ positions START and END to HTML and write the result to DST."
                                            :end (or match-start end))))
                  (pgraph->html q dst 0 (length q)))
                (princ "</blockquote>" dst))
+              ((let ((end2 (+ start 4))) ; code?
+                 (and (<= end2 end)
+                      (string= "    " src :start2 start :end2 end2)))
+               (princ "<pre><code>" dst)
+               (let ((c (regex-replace-all "\\r\\n {4}"
+                                           src
+                                           *eol*
+                                           :start (+ start 4)
+                                           :end (or match-start end))))
+                 (write-sequence (escape-string c) dst))
+               (princ "</code></pre>" dst))
               (t
                (princ "<p>" dst)        ; new paragraph
                (text->html src dst start (or match-start end))
