@@ -252,6 +252,21 @@ immediately after the closing tag in any or after the bracket."
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
+    ("^pre><code>"
+     (multiple-value-bind (after before)
+         (scan-tag "code" src match-end end :lanchor "^<pre><code>"
+                   :ranchor "^</code></pre>")
+       (princ "    " dst)
+       (with-output-to-string (c)
+         (html->text src c match-end (or before end))
+         (write-sequence
+          (regex-replace-all "(?<=\\r\\n)"
+                             (get-output-stream-string c)
+                             "    ")
+          dst))
+       (if after
+           (progn (princ *emptyl* dst) after)
+           end)))
     ("^a href=\"([^\"]+)\">"
      (multiple-value-bind (after before)
          (scan-tag "a" src match-end end)
