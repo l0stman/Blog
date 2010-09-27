@@ -1,5 +1,10 @@
 (in-package :blog)
 
+(defmacro defconstant (sym val &optional doc)
+  "Make sure that VAL is only evaluated once."
+  `(cl:defconstant ,sym (if (boundp ',sym) (symbol-value ',sym) ,val)
+     ,@(when doc (list doc))))
+
 (defmacro deffold (uri path &optional content-type)
   "Define a directory handler for the folder PATH witch will emits all
 the files under URI.  If CONTENT-TYPE is not NIL, it will be used as

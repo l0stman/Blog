@@ -2,6 +2,7 @@
 
 (defpackage :blog
   (:use :hunchentoot :cl-who :cl :cl-ppcre)
+  (:shadow :defconstant)
   (:import-from :ironclad
                 :make-hmac
                 :update-hmac
