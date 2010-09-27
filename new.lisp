@@ -21,7 +21,14 @@
       (:td "[google](http://www.google.com)")
       (:td (:a :href "http://www.google.com" "google")))
      (:tr (:td "foo -- bar") (:td "foo &mdash; bar"))
-     (:tr (:td "Lines starting with four spaces are treated like code")))))
+     (:tr (:td "entity &amp;#248;") (:td "entity &#248;"))
+     (:tr
+      (:td "Lines starting with four spaces <br/>are treated like code:<br/>"
+           (:pre
+            "&nbsp;&nbsp;&nbsp;&nbsp;if i &lt; 10:"
+            (:br "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print \"Hello world!\"")))
+      (:td "Lines starting with four spaces <br/>are treated like code:<br/>"
+           (:pre "if i &lt; 10:<br/>&nbsp;&nbsp;print \"Hello world!\""))))))
 
 (defun new-form (&key id title body uri)
   "Form to add or edit a post."
