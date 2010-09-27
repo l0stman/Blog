@@ -195,7 +195,7 @@ tags or NIL if these conditions are not met."
        (ntag 1))                        ; number opening tags
       ((or (>= i end) (zerop ntag))
        (when (zerop ntag)
-         (values i (- i (length tag) 3))))
+         (values i (- i (length ranchor) -1))))
     (case-match (src i end)
       (lanchor
        (incf ntag)
