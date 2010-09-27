@@ -234,9 +234,11 @@ immediately after the closing tag in any or after the bracket."
      (multiple-value-bind (after before)
          (scan-tag "blockquote" src match-end end)
        (princ #\> dst)
-       (let ((q (html->text src dst match-end (or before end))))
-         (write-sequence (regex-replace-all "\\r\\n" q "\\r\\n>")
-                         dst))
+       (with-output-to-string (q)
+         (html->text src q match-end (or before end))
+         (write-sequence
+          (regex-replace-all "(?<=\\r\\n)" (get-output-stream-string q) ">")
+          dst))
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
