@@ -1,7 +1,11 @@
 (in-package :blog)
 
-(defvar *eol* (coerce '(#\return #\newline) 'string))
-(defvar *emptyl* (concatenate 'string *eol* *eol*))
+(defvar *eol* (coerce '(#\return #\newline) 'string)
+  "String representing an end of line.")
+(defvar *emptyl* (concatenate 'string *eol* *eol*)
+  "String representing an empty line.")
+(defvar *spc* "    "
+  "Blanks prefixing a code in a text.")
 
 (defmacro case-match ((src start end) &body clauses)
   "CASE-MATCH is a dispatcher like CASE that executes the forms in a
@@ -110,9 +114,9 @@ positions START and END to HTML and write the result to DST."
                                            :end (or match-start end))))
                  (pgraph->html q dst 0 (length q)))
                (princ "</blockquote>" dst))
-              ((let ((end2 (+ start 4))) ; code?
+              ((let ((end2 (+ start (length *spc*)))) ; code?
                  (and (<= end2 end)
-                      (string= "    " src :start2 start :end2 end2)))
+                      (string= *spc* src :start2 start :end2 end2)))
                (princ "<pre><code>" dst)
                (let ((c (regex-replace-all "\\r\\n {4}"
                                            src
@@ -308,11 +312,11 @@ immediately after the closing tag in any or after the bracket."
     ("^pre><code>"
      (multiple-value-bind (after before)
          (scan-tag "pre code" src match-end end)
-       (princ "    " dst)
+       (princ *spc* dst)
        (write-sequence
         (regex-replace-all "(?<=\\r\\n)"
                            (unesc src :start match-end :end (or before end))
-                           "    ")
+                           *spc*)
         dst)
        (if after
            (progn (princ *emptyl* dst) after)
