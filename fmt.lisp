@@ -58,9 +58,8 @@ END to HTML and write it to DST."
                (incf i)))))
 
 (defun pgraph->html (src dst start end)
-  "Transform one or more paragraph from the input text string SRC
-between the positions START and END to HTML and write the result to
-DST."
+  "Transform one paragraph from the input text string SRC between the
+positions START and END to HTML and write the result to DST."
   (if (< start end)
       (multiple-value-bind (match-start match-end)
           (scan "(\\r\\n){2,}" src :start start :end end)
@@ -72,15 +71,12 @@ DST."
                                            :start (1+ start)
                                            :end (or match-start end))))
                  (text->html q dst 0 (length q)))
-               (princ "</p></blockquote>" dst)
-               (if match-end
-                   (pgraph->html src dst match-end end)
-                   end))
+               (princ "</p></blockquote>" dst))
               (t
                (princ "<p>" dst)        ; new paragraph
                (text->html src dst start (or match-start end))
-               (princ "</p>" dst)
-               (or match-end end))))
+               (princ "</p>" dst)))
+        (or match-end end))
       end))
 
 (defun in-fmt (s)
