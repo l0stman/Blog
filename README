@@ -1,5 +1,6 @@
 This is a simple blog engine on top of Hunchentoot.  The blog is saved
-directly to disk using a flat file.
+directly to disk using a flat file.  It also supports a subset of
+Markdown for a blog post.
 
 After loading successfully the package, visit the uri ``/blog''.  To
 log in, admin is both the default username and password.
