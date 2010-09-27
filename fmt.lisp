@@ -1,10 +1,10 @@
 (in-package :blog)
 
-(defvar *eol* (coerce '(#\return #\newline) 'string)
+(defconstant +eol+ (coerce '(#\return #\newline) 'string)
   "String representing an end of line.")
-(defvar *emptyl* (concatenate 'string *eol* *eol*)
+(defconstant +emptyl+ (concatenate 'string +eol+ +eol+)
   "String representing an empty line.")
-(defvar *spc* "    "
+(defconstant +spc+ "    "
   "Blanks prefixing a code in a text.")
 
 (defmacro case-match ((src start end) &body clauses)
@@ -109,18 +109,18 @@ positions START and END to HTML and write the result to DST."
                (princ "<blockquote>" dst)
                (let ((q (regex-replace-all "\\r\\n>"
                                            src
-                                           *eol*
+                                           +eol+
                                            :start (1+ start)
                                            :end (or match-start end))))
                  (pgraph->html q dst 0 (length q)))
                (princ "</blockquote>" dst))
-              ((let ((end2 (+ start (length *spc*)))) ; code?
+              ((let ((end2 (+ start (length +spc+)))) ; code?
                  (and (<= end2 end)
-                      (string= *spc* src :start2 start :end2 end2)))
+                      (string= +spc+ src :start2 start :end2 end2)))
                (princ "<pre><code>" dst)
                (let ((c (regex-replace-all "\\r\\n {4}"
                                            src
-                                           *eol*
+                                           +eol+
                                            :start (+ start 4)
                                            :end (or match-start end))))
                  (write-sequence (esc c) dst))
@@ -177,9 +177,9 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
           ((or (>= i end) (char= c (char src i)))
            (setq pos i
                  next (if (>= i end) i (1+ i))))
-        (let ((end1 (+ i (length *emptyl*))))
+        (let ((end1 (+ i (length +emptyl+))))
           (cond ((and (<= end1 end )
-                      (string= src *emptyl* :start1 i :end1 end1))
+                      (string= src +emptyl+ :start1 i :end1 end1))
                  ;; end of paragraph
                  (setq next i
                        pos  i)
@@ -307,19 +307,19 @@ immediately after the closing tag in any or after the bracket."
           (regex-replace-all "(?<=\\r\\n)" (get-output-stream-string q) ">")
           dst))
        (if after
-           (progn (princ *emptyl* dst) after)
+           (progn (princ +emptyl+ dst) after)
            end)))
     ("^pre><code>"
      (multiple-value-bind (after before)
          (scan-tag "pre code" src match-end end)
-       (princ *spc* dst)
+       (princ +spc+ dst)
        (write-sequence
         (regex-replace-all "(?<=\\r\\n)"
                            (unesc src :start match-end :end (or before end))
-                           *spc*)
+                           +spc+)
         dst)
        (if after
-           (progn (princ *emptyl* dst) after)
+           (progn (princ +emptyl+ dst) after)
            end)))
     ("^a href=\"([^\"]+)\">"
      (multiple-value-bind (after before)
@@ -338,7 +338,7 @@ immediately after the closing tag in any or after the bracket."
          (scan-tag "p" src match-end end)
        (html->text src dst match-end (or before end))
        (cond ((and after (< after end))
-              (princ *emptyl* dst)
+              (princ +emptyl+ dst)
               after)
              (t end))))
     (t
