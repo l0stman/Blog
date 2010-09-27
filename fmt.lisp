@@ -214,6 +214,15 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
      (princ #\[ dst)
      (1+ start))))
 
+(defsyn #\- (src dst start end)
+  (let ((pos (1+ start)))
+    (cond ((and (< pos end) (char= #\- (char src pos)))
+           (princ "&mdash;" dst)
+           (1+ pos))
+          (t
+           (princ #\- dst)
+           pos))))
+
 (defun scan-tag (tag src start end)
   "TAG is a string containing the name of tags separated by
 blanks. For example if TAG is equal to \"a b c\", SCAN-TAG would
@@ -247,6 +256,7 @@ immediately after the HTML entity."
     ("^gt;" (princ #\> dst) match-end)
     ("^quot;" (princ #\" dst) match-end)
     ("^amp;" (princ #\& dst) match-end)
+    ("^mdash;" (princ "--" dst) match-end)
     ("^#\\d{3};"                        ; character entity?
      (princ (code-char
              (parse-integer src :start (1+ start) :end (1- match-end)))
