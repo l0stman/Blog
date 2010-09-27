@@ -120,18 +120,18 @@ positions START and END to HTML and write the result to DST."
 LTAG<text>RTAG. <text> should be contained in one paragraph."
   (lambda (src dst start end)
     (let (pos next)
-      (do ((llen (length *emptyl*))
-           (i (1+ start)))
+      (do ((i (1+ start)))
           ((or (>= i end) (char= c (char src i)))
            (setq pos i
                  next (if (>= i end) i (1+ i))))
-        (cond ((and (<= llen (- end i))
-                    (string= src *emptyl* :start1 i :end1 (+ i llen)))
-               ;; end of paragraph
-               (setq next i
-                     pos  i)
-               (return))
-              (t (incf i))))
+        (let ((end1 (+ i (length *emptyl*))))
+          (cond ((and (<= end1 end )
+                      (string= src *emptyl* :start1 i :end1 end1))
+                 ;; end of paragraph
+                 (setq next i
+                       pos  i)
+                 (return))
+                (t (incf i)))))
       (princ ltag dst)
       (text->html src dst (1+ start) pos)
       (princ rtag dst)
