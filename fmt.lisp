@@ -186,14 +186,13 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
      (princ #\[ dst)
      (1+ start))))
 
-(defun scan-tag (tag src start end)
+(defun scan-tag (tag src start end &key (lanchor (format nil "^<~A>" tag))
+                                        (ranchor (format nil "^</~A>" tag)))
   "Return the positions in the string SRC immediately after and before
 the closing tag corresponding to TAG while maintaining balanced
 tags or NIL if these conditions are not met."
   (do ((i start)                        ; position in src
-       (ntag 1)                         ; number opening tags
-       (lanchor (format nil "^<~A>" tag))
-       (ranchor (format nil "^</~A>" tag)))
+       (ntag 1))                        ; number opening tags
       ((or (>= i end) (zerop ntag))
        (when (zerop ntag)
          (values i (- i (length tag) 3))))
