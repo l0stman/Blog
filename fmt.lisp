@@ -186,24 +186,29 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
      (princ #\[ dst)
      (1+ start))))
 
-(defun scan-tag (tag src start end &key (lanchor (format nil "^<~A>" tag))
-                                        (ranchor (format nil "^</~A>" tag)))
-  "Return the positions in the string SRC immediately after and before
-the closing tag corresponding to TAG while maintaining balanced
-tags or NIL if these conditions are not met."
-  (do ((i start)                        ; position in src
-       (ntag 1))                        ; number opening tags
-      ((or (>= i end) (zerop ntag))
-       (when (zerop ntag)
-         (values i (- i (length ranchor) -1))))
-    (case-match (src i end)
-      (lanchor
-       (incf ntag)
-       (setq i match-end))
-      (ranchor
-       (decf ntag)
-       (setq i match-end))
-      (t (incf i)))))
+(defun scan-tag (tag src start end)
+  "TAG is a string containing the name of tags separated by
+blanks. For example if TAG is equal to \"a b c\", SCAN-TAG would
+return the positions just before and after the string \"</c></b></a>\"
+in SRC between the positions START and END.  This is done while
+maintaining balanced tags.  If these conditions are not met, NIL is
+returned."
+  (let* ((tags (split " " tag))
+         (lanchor (format nil "^<~{~A>~^<~}" tags))
+         (ranchor (format nil "^</~{~A>~^</~}" (nreverse tags))))
+    (do ((i start)                      ; position in src
+         (ntag 1))                      ; number opening tags
+        ((or (>= i end) (zerop ntag))
+         (when (zerop ntag)
+           (values i (- i (length ranchor) -1))))
+      (case-match (src i end)
+        (lanchor
+         (incf ntag)
+         (setq i match-end))
+        (ranchor
+         (decf ntag)
+         (setq i match-end))
+        (t (incf i))))))
 
 (defun amp->text (src dst start end)
   "Transform the HTML string SRC between START and END after an
@@ -254,8 +259,7 @@ immediately after the closing tag in any or after the bracket."
            end)))
     ("^pre><code>"
      (multiple-value-bind (after before)
-         (scan-tag "code" src match-end end :lanchor "^<pre><code>"
-                   :ranchor "^</code></pre>")
+         (scan-tag "pre code" src match-end end)
        (princ "    " dst)
        (with-output-to-string (c)
          (html->text src c match-end (or before end))
