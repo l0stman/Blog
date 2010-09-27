@@ -58,13 +58,32 @@ END to HTML and write it to DST."
                (incf i)))))
 
 (defun esc (s)
-  "Escape all the special characters in S."
+  "Transform all the special characters in S into HTML entities."
   (with-output-to-string (d)
     (loop for ch across s
        do (if (and (sfunction ch)
                    (char/= ch #\return))
               (format d "&#~3,'0d;" (char-code ch))
               (princ ch d)))))
+
+(defun unesc (s &key (start 0) (end (length s)))
+  "Transform all the HTML entities in S into characters."
+  (with-output-to-string (d)
+    (loop
+       with i = start
+       while (< i end)
+       do (multiple-value-bind (match-start match-end)
+              (scan "&#\\d{3};" s :start i :end end)
+            (unless match-start
+              (write-sequence s d :start i :end end)
+              (return))
+            (write-sequence s d :start i :end match-start)
+            (princ (code-char
+                    (parse-integer s
+                                   :start (+ match-start 2)
+                                   :end (1- match-end)))
+                   d)
+            (setq i match-end)))))
 
 (defun pgraph->html (src dst start end)
   "Transform the paragraphs from the input text string SRC between the
@@ -270,13 +289,11 @@ immediately after the closing tag in any or after the bracket."
      (multiple-value-bind (after before)
          (scan-tag "pre code" src match-end end)
        (princ "    " dst)
-       (with-output-to-string (c)
-         (html->text src c match-end (or before end))
-         (write-sequence
-          (regex-replace-all "(?<=\\r\\n)"
-                             (get-output-stream-string c)
-                             "    ")
-          dst))
+       (write-sequence
+        (regex-replace-all "(?<=\\r\\n)"
+                           (unesc src :start match-end :end (or before end))
+                           "    ")
+        dst)
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
