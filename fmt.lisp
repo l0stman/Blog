@@ -51,10 +51,10 @@ END to HTML and write it to DST."
   (loop
      with i = start
      while (< i end)
-     do (aif (sfunction (aref src i))
+     do (aif (sfunction (char src i))
              (setq i (funcall it src dst i end))
              (progn
-               (princ (aref src i) dst)
+               (princ (char src i) dst)
                (incf i)))))
 
 (defun pgraph->html (src dst start end)
@@ -63,7 +63,7 @@ positions START and END to HTML and write the result to DST."
   (if (< start end)
       (multiple-value-bind (match-start match-end)
           (scan "(\\r\\n){2,}" src :start start :end end)
-        (cond ((char= #\> (aref src start)) ; blockquote
+        (cond ((char= #\> (char src start)) ; blockquote
                (princ "<blockquote>" dst)
                (let ((q (regex-replace-all "\\r\\n>"
                                            src
@@ -122,7 +122,7 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
     (let (pos next)
       (do ((llen (length *emptyl*))
            (i (1+ start)))
-          ((or (>= i end) (char= c (aref src i)))
+          ((or (>= i end) (char= c (char src i)))
            (setq pos i
                  next (if (>= i end) i (1+ i))))
         (cond ((and (<= llen (- end i))
@@ -145,8 +145,8 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
 
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
-    (cond ((and (< i end) (sfunction (aref src i))) ; special character?
-           (princ (aref src i) dst)
+    (cond ((and (< i end) (sfunction (char src i))) ; special character?
+           (princ (char src i) dst)
            (1+ i))
           (t (princ #\\ dst) i))))
 
@@ -272,7 +272,7 @@ END to ASCII text and write it to DST."
   (loop
      with i = start
      while (< i end)
-     do (let ((c (aref src i)))
+     do (let ((c (char src i)))
           (case c
             (#\& (setq i (amp->text src dst (1+ i) end)))
             (#\< (setq i (lt->text src dst (1+ i) end)))
