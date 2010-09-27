@@ -84,11 +84,7 @@ positions START and END to HTML and write the result to DST."
 (defun in-fmt (s)
   "Transform the input text string to HTML."
   (with-output-to-string (d)
-    (loop
-       with i = 0
-       with len = (length s)
-       while (< i len)
-       do (setq i (pgraph->html s d i len)))))
+    (pgraph->html s d 0 (length s))))
 
 (defsyn #\< (src dst start end)
   (declare (ignore src end))
@@ -238,7 +234,9 @@ immediately after the closing tag in any or after the bracket."
      (multiple-value-bind (after before)
          (scan-tag "blockquote" src match-end end)
        (princ #\> dst)
-       (html->text src dst match-end (or before end))
+       (let ((q (html->text src dst match-end (or before end))))
+         (write-sequence (regex-replace-all "\\r\\n" q "\\r\\n>")
+                         dst))
        (if after
            (progn (princ *emptyl* dst) after)
            end)))
