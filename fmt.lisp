@@ -73,17 +73,17 @@ END to HTML and write it to DST."
                (princ (char src i) dst)
                (incf i)))))
 
-(defun esc (s &key (start 0) (end (length s)))
-  "Transform all the special characters in S into HTML entities."
-  (with-output-to-string (d)
-    (loop
-       for i = start then (1+ i)
-       while (< i end)
-       do (let ((ch (char s i)))
-            (if (and (sfunction ch)
-                     (char/= ch #\return))
-                (format d "&#~3,'0d;" (char-code ch))
-                (princ ch d))))))
+(defun esc (s d &key (start 0) (end (length s)))
+  "Transform all the special characters in S into HTML entities and
+write the result to D."
+  (loop
+     for i = start then (1+ i)
+     while (< i end)
+     do (let ((ch (char s i)))
+          (if (and (sfunction ch)
+                   (char/= ch #\return))
+              (format d "&#~3,'0d;" (char-code ch))
+              (princ ch d)))))
 
 (defun unesc (s &key (start 0) (end (length s)))
   "Transform all the HTML entities in S into characters."
@@ -126,8 +126,7 @@ positions START and END to HTML and write the result to DST."
                  ((and (<= end2 end)
                        (string= +spc+ src :start2 start :end2 end2)) ; code?
                   (princ "<pre><code>" dst)
-                  (write-sequence (esc (strip +spc+ end2))
-                                  dst)
+                  (esc (strip +spc+ end2) dst)
                   (princ "</code></pre>" dst))
                  (t
                   (princ "<p>" dst)     ; new paragraph
