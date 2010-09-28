@@ -85,22 +85,22 @@ write the result to D."
               (format d "&#~3,'0d;" (char-code ch))
               (princ ch d)))))
 
-(defun unesc (s &key (start 0) (end (length s)))
-  "Transform all the HTML entities in S into characters."
-  (with-output-to-string (d)
-    (loop
-       with i = start
-       while (< i end)
-       do (multiple-value-bind (mstart mend)
-              (scan "&#\\d{3};" s :start i :end end)
-            (unless mstart
-              (write-sequence s d :start i :end end)
-              (return))
-            (write-sequence s d :start i :end mstart)
-            (princ (code-char
-                    (parse-integer s :start (+ mstart 2) :end (1- mend)))
-                   d)
-            (setq i mend)))))
+(defun unesc (s d &optional (start 0) (end (length s)))
+  "Transform all the HTML entities in S into characters and write the
+result to D."
+  (loop
+     with i = start
+     while (< i end)
+     do (multiple-value-bind (mstart mend)
+            (scan "&#\\d{3};" s :start i :end end)
+          (unless mstart
+            (write-sequence s d :start i :end end)
+            (return))
+          (write-sequence s d :start i :end mstart)
+          (princ (code-char
+                  (parse-integer s :start (+ mstart 2) :end (1- mend)))
+                 d)
+          (setq i mend))))
 
 (defun pgraph->html (src dst start end)
   "Transform the paragraphs from the input text string SRC between the
@@ -324,7 +324,8 @@ immediately after the closing tag in any or after the bracket."
        (princ +spc+ dst)
        (write-sequence
         (regex-replace-all "(?<=\\r\\n)"
-                           (unesc src :start match-end :end (or before end))
+                           (with-output-to-string (d)
+                             (unesc src d match-end  (or before end)))
                            +spc+)
         dst)
        (if after
