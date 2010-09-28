@@ -290,18 +290,20 @@ returned."
   "Transform the HTML string SRC between START and END after an
 ampersand and write the result to DST. Return the position
 immediately after the HTML entity."
-  (case-match (src start end)
-    ("^lt;" (princ #\< dst) match-end)
-    ("^gt;" (princ #\> dst) match-end)
-    ("^quot;" (princ #\" dst) match-end)
-    ("^amp;" (princ #\& dst) match-end)
-    ("^mdash;" (princ "--" dst) match-end)
-    ("^#\\d{3};"                        ; character entity?
-     (princ (code-char
-             (parse-integer src :start (1+ start) :end (1- match-end)))
-            dst)
-     match-end)
-    (t (princ #\& dst) start)))
+  (case-prefix (src start end)
+    ("lt;" (princ #\< dst) match-end)
+    ("gt;" (princ #\> dst) match-end)
+    ("quot;" (princ #\" dst) match-end)
+    ("amp;" (princ #\& dst) match-end)
+    ("mdash;" (princ "--" dst) match-end)
+    (t
+     (case-match (src start end)
+       ("^#\\d{3};"                     ; character entity?
+        (princ (code-char
+                (parse-integer src :start (1+ start) :end (1- match-end)))
+               dst)
+        match-end)
+       (t (princ "\\&" dst) start)))))
 
 (defun lt->text (src dst start end)
   "Transform the HTML string SRC between START and END after a left
