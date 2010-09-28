@@ -169,9 +169,10 @@ positions START and END to HTML and write the result to DST."
   (princ "&quot;" dst)
   (1+ start))
 
-(defun del->html (c ltag rtag)
-  "Return a syntax handler such that C<text>C is transformed into
-LTAG<text>RTAG. <text> should be contained in one paragraph."
+(defun del->html (c tag fn)
+  "Return a syntax handler such that CTEXTC is transformed into
+<TAG>HTML</TAG>. TEXT should only contain one paragraph. FN is handler
+function that transform TEXT to HTML."
   (lambda (src dst start end)
     (let (pos next)
       (do ((i (1+ start)))
@@ -186,16 +187,16 @@ LTAG<text>RTAG. <text> should be contained in one paragraph."
                        pos  i)
                  (return))
                 (t (incf i)))))
-      (princ ltag dst)
-      (text->html src dst (1+ start) pos)
-      (princ rtag dst)
+      (format dst "<~A>" tag)
+      (funcall fn src dst (1+ start) pos)
+      (format dst "</~A>" tag)
       next)))
 
 (defsyn #\_ (src dst start end)
-  (funcall (del->html #\_ "<em>" "</em>") src dst start end))
+  (funcall (del->html #\_ "em" #'text->html) src dst start end))
 
 (defsyn #\* (src dst start end)
-  (funcall (del->html #\* "<strong>" "</strong>") src dst start end))
+  (funcall (del->html #\* "strong" #'text->html) src dst start end))
 
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
