@@ -314,13 +314,12 @@ it doesn't exist."
      (multiple-value-bind (after before)
          (scan-rtag "blockquote" src match-end end)
        (princ #\> dst)
-       (with-output-to-string (q)
-         (html->text src q match-end (or before end))
-         (write-sequence
-          (regex-replace-all "\\r\\n|\\\\<br/\\\\>"
-                             (get-output-stream-string q)
-                             (format nil "~A>" +eol+))
-          dst))
+       (write-sequence
+        (regex-replace-all "\\r\\n|\\\\<br/\\\\>"
+                           (with-output-to-string (q)
+                             (html->text src q match-end (or before end)))
+                           (format nil "~A>" +eol+))
+        dst)
        (if after
            (progn (princ +emptyl+ dst) after)
            end)))
