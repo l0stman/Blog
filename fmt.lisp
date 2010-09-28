@@ -39,7 +39,7 @@ start and end positions of the registers in RE."
   (defparameter *syntax-table* (make-array 255 :initial-element NIL)
     "Table containing syntax handler functions for input text."))
 
-(defun sfunction (ch)
+(defun sfunc (ch)
   "Return the syntax handler function corresponding to the character
 CH."
   (let ((c (char-code ch)))
@@ -74,7 +74,7 @@ END to HTML and write it to DST."
   (loop
      with i = start
      while (< i end)
-     do (aif (sfunction (char src i))
+     do (aif (sfunc (char src i))
              (setq i (funcall it src dst i end))
              (progn
                (princ (char src i) dst)
@@ -87,7 +87,7 @@ write the result to D."
      for i = start then (1+ i)
      while (< i end)
      do (let ((ch (char s i)))
-          (if (and (sfunction ch)
+          (if (and (sfunc ch)
                    (char/= ch #\return))
               (format d "&#~3,'0d;" (char-code ch))
               (princ ch d)))))
@@ -203,7 +203,7 @@ function that transform TEXT to HTML."
 
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
-    (cond ((and (< i end) (sfunction (char src i))) ; special character?
+    (cond ((and (< i end) (sfunc (char src i))) ; special character?
            (princ (char src i) dst)
            (1+ i))
           (t (princ #\\ dst) i))))
@@ -371,7 +371,7 @@ END to ASCII text and write it to DST."
             (#\& (setq i (amp->text src dst (1+ i) end)))
             (#\< (setq i (lt->text src dst (1+ i) end)))
             (otherwise
-             (if (and (sfunction c)     ; special character?
+             (if (and (sfunc c)     ; special character?
                       (char/= c #\return))
                  (format dst "\\~C" c)
                  (princ c dst))
