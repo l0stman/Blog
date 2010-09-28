@@ -242,6 +242,26 @@ function that transform TEXT to HTML."
            (princ #\- dst)
            pos))))
 
+(defmacro case-prefix ((src start end) &body clauses)
+  "CASE-PREFIX is like CASE-MATCH but instead of matching a regex, it
+tries to find if a string literal is a prefix of SRC at position
+START."
+  (labels ((iter (clauses)
+             (when-bind (cl (car clauses))
+               (if (eq (car cl) t)
+                   `(progn ,@(cdr cl))
+                   (w/syms (end2)
+                     `(let ((,end2 (+ ,start
+                                      ,(if (stringp (car cl))
+                                           (length (car cl))
+                                           `(length ,(car cl))))))
+                        (if (and (<= ,end2 ,end)
+                                 (string= ,(car cl) ,src :start2 ,start
+                                                         :end2 ,end2))
+                            (progn ,@(cdr cl))
+                            ,(iter (cdr clauses)))))))))
+    (iter clauses)))
+
 (defun scan-rtag (tag src start end)
   "TAG is a string containing the name of tags separated by
 blanks. For example if TAG is equal to \"a b c\", SCAN-RTAG would
@@ -250,20 +270,21 @@ in SRC between the positions START and END.  This is done while
 maintaining balanced tags.  If these conditions are not met, NIL is
 returned."
   (let* ((tags (split " " tag))
-         (lanchor (format nil "^<~{~A>~^<~}" tags))
-         (ranchor (format nil "^</~{~A>~^</~}" (nreverse tags))))
+         (ltag (format nil "<~{~A>~^<~}" tags))
+         (rtag (format nil "</~{~A>~^</~}" (nreverse tags))))
+    (declare (string ltag rtag))
     (do ((i start)                      ; position in src
          (ntag 1))                      ; number opening tags
         ((or (>= i end) (zerop ntag))
          (when (zerop ntag)
-           (values i (- i (length ranchor) -1))))
-      (case-match (src i end)
-        (lanchor
+           (values i (- i (length rtag)))))
+      (case-prefix (src i end)
+        (ltag
          (incf ntag)
-         (setq i match-end))
-        (ranchor
+         (incf i (length ltag)))
+        (rtag
          (decf ntag)
-         (setq i match-end))
+         (incf i (length rtag)))
         (t (incf i))))))
 
 (defun amp->text (src dst start end)
