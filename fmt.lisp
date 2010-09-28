@@ -47,21 +47,27 @@ CH."
     (when (< c (length *syntax-table*))
       (aref *syntax-table* c))))
 
-(defmacro defsyn (char (src dst start end) &body body)
-  "Define the procedure of four arguments SRC, DST, START and END and
-whose body is BODY as the syntax handler function associated with
-CHAR.  That procedure should be called when we encounter the character
-CHAR and the position after the last processed character should be
-returned.  The input text is the substring of SRC between the
-positions START and END (CHAR is at the position START.)  The result
-is written in the stream DST."
+(defmacro defsyn (char &body body)
+  "Associate a procedure of four arguments as the syntax handler
+function associated with the character CHAR.  That procedure should be
+called when we encounter CHAR and the position after the last
+processed character should be returned.
+
+If BODY is a singleton, it's considered to be the procedure itself.
+Otherwise, it should have the form: \(SRC DST START END) STATEMENT*,
+where STATEMENT* is the body of the procedure.  The input text is the
+substring of SRC between the positions START and END \(CHAR is at the
+position START) and the result is written into the stream DST."
   (let ((code (char-code char)))
     (unless (< code (length *syntax-table*))
       (error "couldn't associate a syntax function with ~C" char))
     `(setf (aref *syntax-table* ,code)
-           (lambda (,src ,dst ,start ,end)
-             (declare (ignorable ,src ,dst ,start ,end))
-             ,@body))))
+           ,(if (cdr body)
+                (destructuring-bind (src dst start end) (car body)
+                  `(lambda (,src ,dst ,start ,end)
+                     (declare (ignorable ,src ,dst ,start ,end))
+                     ,@(cdr body)))
+                (car body)))))
 
 (defun text->html (src dst start end)
   "Transform the input text string SRC between the positions START and
@@ -192,14 +198,9 @@ function that transform TEXT to HTML."
       (format dst "</~A>" tag)
       next)))
 
-(defsyn #\_ (src dst start end)
-  (funcall (del->html #\_ "em" #'text->html) src dst start end))
-
-(defsyn #\* (src dst start end)
-  (funcall (del->html #\* "strong" #'text->html) src dst start end))
-
-(defsyn #\` (src dst start end)
-  (funcall (del->html #\` "code" #'esc) src dst start end))
+(defsyn #\_ (del->html #\_ "em" #'text->html))
+(defsyn #\* (del->html #\* "strong" #'text->html))
+(defsyn #\` (del->html #\` "code" #'esc))
 
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
