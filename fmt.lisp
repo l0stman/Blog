@@ -73,7 +73,7 @@ END to HTML and write it to DST."
                (princ (char src i) dst)
                (incf i)))))
 
-(defun esc (s d &key (start 0) (end (length s)))
+(defun esc (s d &optional (start 0) (end (length s)))
   "Transform all the special characters in S into HTML entities and
 write the result to D."
   (loop
