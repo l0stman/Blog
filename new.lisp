@@ -22,6 +22,8 @@
       (:td (:a :href "http://www.google.com" "google")))
      (:tr (:td "foo -- bar") (:td "foo &mdash; bar"))
      (:tr (:td "entity &amp;#248;") (:td "entity &#248;"))
+     (:tr (:td "inline code `a &lt; 10`")
+          (:td "inline code <code>a &lt; 10</code>"))
      (:tr
       (:td "Lines starting with four spaces <br/>are treated like code:<br/>"
            (:pre
