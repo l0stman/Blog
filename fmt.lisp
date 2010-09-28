@@ -59,7 +59,9 @@ is written in the stream DST."
     (unless (< code (length *syntax-table*))
       (error "couldn't associate a syntax function with ~C" char))
     `(setf (aref *syntax-table* ,code)
-           (lambda (,src ,dst ,start ,end) ,@body))))
+           (lambda (,src ,dst ,start ,end)
+             (declare (ignorable ,src ,dst ,start ,end))
+             ,@body))))
 
 (defun text->html (src dst start end)
   "Transform the input text string SRC between the positions START and
@@ -143,17 +145,14 @@ positions START and END to HTML and write the result to DST."
     (pgraph->html s d 0 (length s))))
 
 (defsyn #\< (src dst start end)
-  (declare (ignore src end))
   (princ "&lt;" dst)
   (1+ start))
 
 (defsyn #\> (src dst start end)
-  (declare (ignore src end))
   (princ "&gt;" dst)
   (1+ start))
 
 (defsyn #\' (src dst start end)
-  (declare (ignore src end))
   (princ "&#039;" dst)
   (1+ start))
 
@@ -167,7 +166,6 @@ positions START and END to HTML and write the result to DST."
      (1+ start))))
 
 (defsyn #\" (src dst start end)
-  (declare (ignore src end))
   (princ "&quot;" dst)
   (1+ start))
 
