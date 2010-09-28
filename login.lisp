@@ -63,7 +63,7 @@
 
 (defhand (logout "/logout") ()
   (set-cookie *ck-name* :expires (1- (get-universal-time)))
-  (redirect (referer)))
+  (redirect (or (referer) "/blog")))
 
 (defun loggedp ()
   "Verify if the client is logged in and update its cookie."
