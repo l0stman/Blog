@@ -245,21 +245,20 @@ function that transform TEXT to HTML."
 (defmacro case-prefix ((src start end) &body clauses)
   "CASE-PREFIX is like CASE-MATCH but instead of matching a regex, it
 tries to find if a string literal is a prefix of SRC at position
-START."
+START.  MATCH-END is bind to the position after the prefix in SRC."
   (labels ((iter (clauses)
              (when-bind (cl (car clauses))
                (if (eq (car cl) t)
                    `(progn ,@(cdr cl))
-                   (w/syms (end2)
-                     `(let ((,end2 (+ ,start
-                                      ,(if (stringp (car cl))
-                                           (length (car cl))
-                                           `(length ,(car cl))))))
-                        (if (and (<= ,end2 ,end)
-                                 (string= ,(car cl) ,src :start2 ,start
-                                                         :end2 ,end2))
-                            (progn ,@(cdr cl))
-                            ,(iter (cdr clauses)))))))))
+                   `(let ((match-end (+ ,start
+                                       ,(if (stringp (car cl))
+                                            (length (car cl))
+                                            `(length ,(car cl))))))
+                      (if (and (<= match-end ,end)
+                               (string= ,(car cl) ,src :start2 ,start
+                                        :end2 match-end))
+                          (progn ,@(cdr cl))
+                          ,(iter (cdr clauses))))))))
     (iter clauses)))
 
 (defun scan-rtag (tag src start end)
@@ -281,10 +280,10 @@ returned."
       (case-prefix (src i end)
         (ltag
          (incf ntag)
-         (incf i (length ltag)))
+         (setq i match-end))
         (rtag
          (decf ntag)
-         (incf i (length rtag)))
+         (setq i match-end))
         (t (incf i))))))
 
 (defun amp->text (src dst start end)
