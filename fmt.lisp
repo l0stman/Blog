@@ -105,30 +105,26 @@ positions START and END to HTML and write the result to DST."
   (if (< start end)
       (multiple-value-bind (match-start match-end)
           (scan "(\\r\\n){2,}" src :start start :end end)
-        (let ((end2 (+ start (length +spc+))))
-          (cond ((char= #\> (char src start)) ; blockquote ?
-                 (princ "<blockquote>" dst)
-                 (let ((q (regex-replace-all "\\r\\n>"
-                                             src
-                                             +eol+
-                                             :start (1+ start)
-                                             :end (or match-start end))))
-                   (pgraph->html q dst 0 (length q)))
-                 (princ "</blockquote>" dst))
-                ((and (<= end2 end)
-                      (string= +spc+ src :start2 start :end2 end2)) ; code?
-                 (princ "<pre><code>" dst)
-                 (let ((c (regex-replace-all (format nil "\\r\\n~A" +spc+)
-                                             src
-                                             +eol+
-                                             :start end2
-                                             :end (or match-start end))))
-                   (write-sequence (esc c) dst))
-                 (princ "</code></pre>" dst))
-                (t
-                 (princ "<p>" dst)      ; new paragraph
-                 (text->html src dst start (or match-start end))
-                 (princ "</p>" dst))))
+        (flet ((strip (pref pos)
+                 (regex-replace-all (format nil "\\r\\n~A" pref) src +eol+
+                                    :start pos
+                                    :end (or match-start end))))
+         (let ((end2 (+ start (length +spc+))))
+           (cond ((char= #\> (char src start)) ; blockquote ?
+                  (princ "<blockquote>" dst)
+                  (let ((q (strip #\> (1+ start))))
+                    (pgraph->html q dst 0 (length q)))
+                  (princ "</blockquote>" dst))
+                 ((and (<= end2 end)
+                       (string= +spc+ src :start2 start :end2 end2)) ; code?
+                  (princ "<pre><code>" dst)
+                  (write-sequence (esc (strip +spc+ end2))
+                                  dst)
+                  (princ "</code></pre>" dst))
+                 (t
+                  (princ "<p>" dst)     ; new paragraph
+                  (text->html src dst start (or match-start end))
+                  (princ "</p>" dst)))))
         (if match-end
             (pgraph->html src dst match-end end)
             end))
