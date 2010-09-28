@@ -310,29 +310,29 @@ immediately after the HTML entity."
 angle bracket and write the result to DST.  Return the position
 immediately after the closing tag or the position after the bracket if
 it doesn't exist."
-  (case-match (src start end)
-    ("^em>"
+  (case-prefix (src start end)
+    ("em>"
      (multiple-value-bind (after before)
          (scan-rtag "em" src match-end end)
        (princ #\_ dst)
        (html->text src dst match-end (or before end))
        (princ #\_ dst)
        (or after end)))
-    ("^strong>"
+    ("strong>"
      (multiple-value-bind (after before)
          (scan-rtag "strong" src match-end end)
        (princ #\* dst)
        (html->text src dst match-end (or before end))
        (princ #\* dst)
        (or after end)))
-    ("^code>"
+    ("code>"
      (multiple-value-bind (after before)
          (scan-rtag "code" src match-end end)
        (princ #\` dst)
        (unesc src dst match-end (or before end))
        (princ #\` dst)
        (or after end)))
-    ("^blockquote>"
+    ("blockquote>"
      (multiple-value-bind (after before)
          (scan-rtag "blockquote" src match-end end)
        (princ #\> dst)
@@ -345,7 +345,7 @@ it doesn't exist."
        (if after
            (progn (princ +emptyl+ dst) after)
            end)))
-    ("^pre><code>"
+    ("pre><code>"
      (multiple-value-bind (after before)
          (scan-rtag "pre code" src match-end end)
        (princ +spc+ dst)
@@ -358,19 +358,7 @@ it doesn't exist."
        (if after
            (progn (princ +emptyl+ dst) after)
            end)))
-    ("^a href=\"([^\"]+)\">"
-     (multiple-value-bind (after before)
-         (scan-rtag "a" src match-end end)
-       (princ #\[ dst)
-       (html->text src dst match-end (or before end))
-       (princ "](" dst)
-       (write-sequence src
-                       dst
-                       :start (aref reg-starts 0)
-                       :end (aref reg-ends 0))
-       (princ #\) dst)
-       (or after end)))
-    ("^p>"
+    ("p>"
      (multiple-value-bind (after before)
          (scan-rtag "p" src match-end end)
        (html->text src dst match-end (or before end))
@@ -379,8 +367,22 @@ it doesn't exist."
               after)
              (t end))))
     (t
-     (princ "\\<" dst)
-     start)))
+     (case-match (src start end)
+       ("^a href=\"([^\"]+)\">"         ; link?
+        (multiple-value-bind (after before)
+            (scan-rtag "a" src match-end end)
+          (princ #\[ dst)
+          (html->text src dst match-end (or before end))
+          (princ "](" dst)
+          (write-sequence src
+                          dst
+                          :start (aref reg-starts 0)
+                          :end (aref reg-ends 0))
+          (princ #\) dst)
+          (or after end)))
+       (t
+        (princ "\\<" dst)
+        start)))))
 
 (defun html->text (src dst start end)
   "Transform the input HTML string SRC between the positions START and
