@@ -113,7 +113,12 @@ positions START and END to HTML and write the result to DST."
            (cond ((char= #\> (char src start)) ; blockquote ?
                   (princ "<blockquote>" dst)
                   (let ((q (strip #\> (1+ start))))
-                    (pgraph->html q dst 0 (length q)))
+                    (write-sequence
+                     (regex-replace-all "\\r\\n"
+                                        (with-output-to-string (s)
+                                          (pgraph->html q s 0 (length q)))
+                                        "<br/>")
+                     dst))
                   (princ "</blockquote>" dst))
                  ((and (<= end2 end)
                        (string= +spc+ src :start2 start :end2 end2)) ; code?
@@ -300,7 +305,9 @@ immediately after the closing tag in any or after the bracket."
        (with-output-to-string (q)
          (html->text src q match-end (or before end))
          (write-sequence
-          (regex-replace-all "(?<=\\r\\n)" (get-output-stream-string q) ">")
+          (regex-replace-all "\\r\\n|\\\\<br/\\\\>"
+                             (get-output-stream-string q)
+                             (format nil "~A>" +eol+))
           dst))
        (if after
            (progn (princ +emptyl+ dst) after)
@@ -338,7 +345,7 @@ immediately after the closing tag in any or after the bracket."
               after)
              (t end))))
     (t
-     (princ #\< dst)
+     (princ "\\<" dst)
      start)))
 
 (defun html->text (src dst start end)
