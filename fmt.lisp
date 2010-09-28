@@ -200,6 +200,9 @@ function that transform TEXT to HTML."
 (defsyn #\* (src dst start end)
   (funcall (del->html #\* "strong" #'text->html) src dst start end))
 
+(defsyn #\` (src dst start end)
+  (funcall (del->html #\` "code" #'esc) src dst start end))
+
 (defsyn #\\ (src dst start end)
   (let ((i (1+ start)))
     (cond ((and (< i end) (sfunction (char src i))) ; special character?
