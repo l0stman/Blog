@@ -304,6 +304,13 @@ immediately after the closing tag in any or after the bracket."
        (html->text src dst match-end (or before end))
        (princ #\* dst)
        (or after end)))
+    ("^code>"
+     (multiple-value-bind (after before)
+         (scan-tag "code" src match-end end)
+       (princ #\` dst)
+       (unesc src dst match-end (or before end))
+       (princ #\` dst)
+       (or after end)))
     ("^blockquote>"
      (multiple-value-bind (after before)
          (scan-tag "blockquote" src match-end end)
@@ -325,7 +332,7 @@ immediately after the closing tag in any or after the bracket."
        (write-sequence
         (regex-replace-all "(?<=\\r\\n)"
                            (with-output-to-string (d)
-                             (unesc src d match-end  (or before end)))
+                             (unesc src d match-end (or before end)))
                            +spc+)
         dst)
        (if after
