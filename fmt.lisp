@@ -242,9 +242,9 @@ function that transform TEXT to HTML."
            (princ #\- dst)
            pos))))
 
-(defun scan-tag (tag src start end)
+(defun scan-rtag (tag src start end)
   "TAG is a string containing the name of tags separated by
-blanks. For example if TAG is equal to \"a b c\", SCAN-TAG would
+blanks. For example if TAG is equal to \"a b c\", SCAN-RTAG would
 return the positions just before and after the string \"</c></b></a>\"
 in SRC between the positions START and END.  This is done while
 maintaining balanced tags.  If these conditions are not met, NIL is
@@ -286,32 +286,33 @@ immediately after the HTML entity."
 (defun lt->text (src dst start end)
   "Transform the HTML string SRC between START and END after a left
 angle bracket and write the result to DST.  Return the position
-immediately after the closing tag in any or after the bracket."
+immediately after the closing tag or the position after the bracket if
+it doesn't exist."
   (case-match (src start end)
     ("^em>"
      (multiple-value-bind (after before)
-         (scan-tag "em" src match-end end)
+         (scan-rtag "em" src match-end end)
        (princ #\_ dst)
        (html->text src dst match-end (or before end))
        (princ #\_ dst)
        (or after end)))
     ("^strong>"
      (multiple-value-bind (after before)
-         (scan-tag "strong" src match-end end)
+         (scan-rtag "strong" src match-end end)
        (princ #\* dst)
        (html->text src dst match-end (or before end))
        (princ #\* dst)
        (or after end)))
     ("^code>"
      (multiple-value-bind (after before)
-         (scan-tag "code" src match-end end)
+         (scan-rtag "code" src match-end end)
        (princ #\` dst)
        (unesc src dst match-end (or before end))
        (princ #\` dst)
        (or after end)))
     ("^blockquote>"
      (multiple-value-bind (after before)
-         (scan-tag "blockquote" src match-end end)
+         (scan-rtag "blockquote" src match-end end)
        (princ #\> dst)
        (with-output-to-string (q)
          (html->text src q match-end (or before end))
@@ -325,7 +326,7 @@ immediately after the closing tag in any or after the bracket."
            end)))
     ("^pre><code>"
      (multiple-value-bind (after before)
-         (scan-tag "pre code" src match-end end)
+         (scan-rtag "pre code" src match-end end)
        (princ +spc+ dst)
        (write-sequence
         (regex-replace-all "(?<=\\r\\n)"
@@ -338,7 +339,7 @@ immediately after the closing tag in any or after the bracket."
            end)))
     ("^a href=\"([^\"]+)\">"
      (multiple-value-bind (after before)
-         (scan-tag "a" src match-end end)
+         (scan-rtag "a" src match-end end)
        (princ #\[ dst)
        (html->text src dst match-end (or before end))
        (princ "](" dst)
@@ -350,7 +351,7 @@ immediately after the closing tag in any or after the bracket."
        (or after end)))
     ("^p>"
      (multiple-value-bind (after before)
-         (scan-tag "p" src match-end end)
+         (scan-rtag "p" src match-end end)
        (html->text src dst match-end (or before end))
        (cond ((and after (< after end))
               (princ +emptyl+ dst)
