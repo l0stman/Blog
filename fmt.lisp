@@ -21,19 +21,18 @@ REG-STARTS and REG-ENDS are bound respectively to the positions of the
 start of the match and the end of the match, the arrays containing the
 start and end positions of the registers in RE."
   (labels ((iter (clauses)
-             (when clauses
-               (let ((cl (car clauses)))
-                 (if (eq (car cl) t)
-                     `(progn ,@(cdr cl)) ; default statement
-                     `(multiple-value-bind (match-start
-                                            match-end
-                                            reg-starts
-                                            reg-ends)
-                          (scan ,(car cl) ,src :start ,start :end ,end)
-                        (declare (ignorable match-end reg-starts reg-ends))
-                        (if match-start
-                            (progn ,@(cdr cl))
-                            ,(iter (cdr clauses)))))))))
+             (when-bind  (cl (car clauses))
+               (if (eq (car cl) t)
+                   `(progn ,@(cdr cl))  ; default statement
+                   `(multiple-value-bind (match-start
+                                          match-end
+                                          reg-starts
+                                          reg-ends)
+                        (scan ,(car cl) ,src :start ,start :end ,end)
+                      (declare (ignorable match-end reg-starts reg-ends))
+                      (if match-start
+                          (progn ,@(cdr cl))
+                          ,(iter (cdr clauses))))))))
     (iter clauses)))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
