@@ -122,6 +122,14 @@ result to D."
              d)
       (setq start mend))))
 
+(declaim (inline esc-str unesc-str))
+(defun esc-str (s)
+  (with-output-to-string (d)
+    (esc s d)))
+(defun unesc-str (s)
+  (with-output-to-string (d)
+    (unesc s d)))
+
 (defun pgraph->html (src dst start end)
   "Transform the paragraphs from the input text string SRC between the
 positions START and END to HTML and write the result to DST."

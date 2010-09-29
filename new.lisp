@@ -39,7 +39,7 @@
 	   (when id
 	     (htm (:input :type "hidden" :name "id" :value id)))
            (:input :type "hidden" :name "uri" :value uri)
-	   (:div :class "post-title" (str (in-fmt (or title ""))))
+	   (:div :class "post-title" (esc (or title "")))
 	   (:div :class "post-body" (str (in-fmt (or body ""))))
 	   (:table
 	    (:tr
@@ -75,8 +75,7 @@
          ((string= action "edit")
           (aif (find-post id)
                (new-form :id id
-                         :title (with-output-to-string (s)
-                                  (unesc (title it) s))
+                         :title (unesc-str (title it))
                          :body (out-fmt (body it))
                          :uri uri)
                (blog-error)))
