@@ -245,7 +245,7 @@ function that transform TEXT to HTML."
 (defmacro case-prefix ((src start end) &body clauses)
   "CASE-PREFIX is like CASE-MATCH but instead of matching a regex, it
 tries to find if a string literal is a prefix of SRC at position
-START.  MATCH-END is bind to the position after the prefix in SRC."
+START.  MATCH-END is bound to the position after the prefix in SRC."
   (labels ((iter (clauses)
              (when-bind (cl (car clauses))
                (if (eq (car cl) t)
@@ -273,7 +273,7 @@ returned."
          (rtag (format nil "</~{~A>~^</~}" (nreverse tags))))
     (declare (string ltag rtag))
     (do ((i start)                      ; position in src
-         (ntag 1))                      ; number opening tags
+         (ntag 1))                      ; number of opening tags
         ((or (>= i end) (zerop ntag))
          (when (zerop ntag)
            (values i (- i (length rtag)))))
