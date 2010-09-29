@@ -45,7 +45,7 @@
 	    (:tr
 	     (:td "title")
 	     (:td (:input :type "text" :name "title"
-			  :value (escape-string title))))
+			  :value (esc title))))
 	    (:tr
 	     (:td "body")
 	     (:td (:textarea :name "body" (str body))))
@@ -75,7 +75,8 @@
          ((string= action "edit")
           (aif (find-post id)
                (new-form :id id
-                         :title (out-fmt (title it))
+                         :title (with-output-to-string (s)
+                                  (unesc (title it) s))
                          :body (out-fmt (body it))
                          :uri uri)
                (blog-error)))
