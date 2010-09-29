@@ -63,3 +63,15 @@ given URI."
   `(let ((,var ,expr))
      (when ,var
        ,@body)))
+
+(defmacro for ((var start end) &body body)
+  (w/syms (gend)
+    `(do ((,var ,start (1+ ,var))
+          (,gend ,end))
+         ((>= ,var ,gend))
+       ,@body)))
+
+(defmacro while (test &body body)
+  `(do ()
+       ((not ,test))
+     ,@body))

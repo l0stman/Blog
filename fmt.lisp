@@ -90,22 +90,18 @@ position START) and the result is written into the stream DST."
 (defun text->html (src dst start end)
   "Transform the input text string SRC between the positions START and
 END to HTML and write it to DST."
-  (loop
-     with i = start
-     while (< i end)
-     do (aif (sfunc (char src i))
-             (setq i (funcall it src dst i end))
-             (progn
-               (princ (char src i) dst)
-               (incf i)))))
+  (while (< start end)
+    (aif (sfunc (char src start))
+         (setq start (funcall it src dst start end))
+         (progn
+           (princ (char src start) dst)
+           (incf start)))))
 
 (defun esc (s d &optional (start 0) (end (length s)))
   "Transform all the special characters in S into HTML entities and
 write the result to D."
-  (loop
-     for i = start then (1+ i)
-     while (< i end)
-     do (let ((ch (char s i)))
+  (for (i start end)
+    (let ((ch (char s i)))
           (if (and (sfunc ch)
                    (char/= ch #\return))
               (format d "&#~3,'0d;" (char-code ch))
@@ -114,19 +110,17 @@ write the result to D."
 (defun unesc (s d &optional (start 0) (end (length s)))
   "Transform all the HTML entities in S into characters and write the
 result to D."
-  (loop
-     with i = start
-     while (< i end)
-     do (multiple-value-bind (mstart mend)
-            (scan "&#\\d{3};" s :start i :end end)
-          (unless mstart
-            (write-sequence s d :start i :end end)
-            (return))
-          (write-sequence s d :start i :end mstart)
-          (princ (code-char
-                  (parse-integer s :start (+ mstart 2) :end (1- mend)))
-                 d)
-          (setq i mend))))
+  (while (< start end)
+    (multiple-value-bind (mstart mend)
+        (scan "&#\\d{3};" s :start start :end end)
+      (unless mstart
+        (write-sequence s d :start start :end end)
+        (return))
+      (write-sequence s d :start start :end mstart)
+      (princ (code-char
+              (parse-integer s :start (+ mstart 2) :end (1- mend)))
+             d)
+      (setq start mend))))
 
 (defun pgraph->html (src dst start end)
   "Transform the paragraphs from the input text string SRC between the
@@ -385,19 +379,17 @@ it doesn't exist."
 (defun html->text (src dst start end)
   "Transform the input HTML string SRC between the positions START and
 END to ASCII text and write it to DST."
-  (loop
-     with i = start
-     while (< i end)
-     do (let ((c (char src i)))
-          (case c
-            (#\& (setq i (amp->text src dst (1+ i) end)))
-            (#\< (setq i (lt->text src dst (1+ i) end)))
-            (otherwise
-             (if (and (sfunc c)     ; special character?
-                      (char/= c #\return))
-                 (format dst "\\~C" c)
-                 (princ c dst))
-             (incf i))))))
+  (while (< start end)
+    (let ((c (char src start)))
+      (case c
+        (#\& (setq start (amp->text src dst (1+ start) end)))
+        (#\< (setq start (lt->text src dst (1+ start) end)))
+        (otherwise
+         (if (and (sfunc c)             ; special character?
+                  (char/= c #\return))
+             (format dst "\\~C" c)
+             (princ c dst))
+         (incf start))))))
 
 (defun out-fmt (s)
   "Transform the input HTML string to ASCII."
