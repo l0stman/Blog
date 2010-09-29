@@ -35,6 +35,25 @@ start and end positions of the registers in RE."
                           ,(iter (cdr clauses))))))))
     (iter clauses)))
 
+(defmacro case-prefix ((src start end) &body clauses)
+  "CASE-PREFIX is like CASE-MATCH but instead of matching a regex, it
+tries to find if a string literal is a prefix of SRC at position
+START.  MATCH-END is bound to the position after the prefix in SRC."
+  (labels ((iter (clauses)
+             (when-bind (cl (car clauses))
+               (if (eq (car cl) t)
+                   `(progn ,@(cdr cl))
+                   `(let ((match-end (+ ,start
+                                       ,(if (stringp (car cl))
+                                            (length (car cl))
+                                            `(length ,(car cl))))))
+                      (if (and (<= match-end ,end)
+                               (string= ,(car cl) ,src :start2 ,start
+                                        :end2 match-end))
+                          (progn ,@(cdr cl))
+                          ,(iter (cdr clauses))))))))
+    (iter clauses)))
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (defparameter *syntax-table* (make-array 255 :initial-element NIL)
     "Table containing syntax handler functions for input text."))
@@ -184,14 +203,12 @@ function that transform TEXT to HTML."
           ((or (>= i end) (char= c (char src i)))
            (setq pos i
                  next (if (>= i end) i (1+ i))))
-        (let ((end1 (+ i (length +emptyl+))))
-          (cond ((and (<= end1 end )
-                      (string= src +emptyl+ :start1 i :end1 end1))
-                 ;; end of paragraph
-                 (setq next i
-                       pos  i)
-                 (return))
-                (t (incf i)))))
+        (case-prefix (src i end)
+          (+emptyl+                     ; end of paragraph
+           (setq next i
+                 pos i)
+           (return))
+          (t (incf i))))
       (format dst "<~A>" tag)
       (funcall fn src dst (1+ start) pos)
       (format dst "</~A>" tag)
@@ -241,25 +258,6 @@ function that transform TEXT to HTML."
           (t
            (princ #\- dst)
            pos))))
-
-(defmacro case-prefix ((src start end) &body clauses)
-  "CASE-PREFIX is like CASE-MATCH but instead of matching a regex, it
-tries to find if a string literal is a prefix of SRC at position
-START.  MATCH-END is bound to the position after the prefix in SRC."
-  (labels ((iter (clauses)
-             (when-bind (cl (car clauses))
-               (if (eq (car cl) t)
-                   `(progn ,@(cdr cl))
-                   `(let ((match-end (+ ,start
-                                       ,(if (stringp (car cl))
-                                            (length (car cl))
-                                            `(length ,(car cl))))))
-                      (if (and (<= match-end ,end)
-                               (string= ,(car cl) ,src :start2 ,start
-                                        :end2 match-end))
-                          (progn ,@(cdr cl))
-                          ,(iter (cdr clauses))))))))
-    (iter clauses)))
 
 (defun scan-rtag (tag src start end)
   "TAG is a string containing the name of tags separated by
