@@ -102,10 +102,10 @@ END to HTML and write it to DST."
 write the result to D."
   (for (i start end)
     (let ((ch (char s i)))
-          (if (and (sfunc ch)
-                   (char/= ch #\return))
-              (format d "&#~3,'0d;" (char-code ch))
-              (princ ch d)))))
+      (if (and (sfunc ch)
+               (char/= ch #\return))
+          (format d "&#~3,'0d;" (char-code ch))
+          (princ ch d)))))
 
 (defun unesc (s d &optional (start 0) (end (length s)))
   "Transform all the HTML entities in S into characters and write the
