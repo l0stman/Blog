@@ -66,7 +66,7 @@ CH."
       (aref *syntax-table* c))))
 
 (defmacro defsyn (char &body body)
-  "Associate a procedure of four arguments as the syntax handler
+  "Define a procedure of four arguments as the syntax handler
 function associated with the character CHAR.  That procedure should be
 called when we encounter CHAR and the position after the last
 processed character should be returned.
@@ -197,8 +197,8 @@ positions START and END to HTML and write the result to DST."
 
 (defun del->html (c tag fn)
   "Return a syntax handler such that CTEXTC is transformed into
-<TAG>HTML</TAG>. TEXT should only contain one paragraph. FN is handler
-function that transform TEXT to HTML."
+<TAG>HTML</TAG>. TEXT should only contain one paragraph. FN is a
+handler function that transforms TEXT to HTML."
   (lambda (src dst start end)
     (let (pos next)
       (do ((i (1+ start)))
