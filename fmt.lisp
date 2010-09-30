@@ -264,10 +264,10 @@ handler function that transforms TEXT to HTML."
 (defun scan-rtag (tag src start end)
   "TAG is a string containing the name of tags separated by
 blanks. For example if TAG is equal to \"a b c\", SCAN-RTAG would
-return the positions just before and after the string \"</c></b></a>\"
-in SRC between the positions START and END.  This is done while
-maintaining balanced tags.  If these conditions are not met, NIL is
-returned."
+return the positions of the end and beginning of the string
+\"</c></b></a>\" in SRC between the positions START and END.  This is
+done while maintaining balanced tags.  If these conditions are not
+met, NIL is returned."
   (let* ((tags (split " " tag))
          (ltag (format nil "<~{~A>~^<~}" tags))
          (rtag (format nil "</~{~A>~^</~}" (nreverse tags))))
