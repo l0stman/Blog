@@ -261,30 +261,24 @@ handler function that transforms TEXT to HTML."
            (princ #\- dst)
            pos))))
 
-(defun scan-rtag (tag src start end)
-  "TAG is a string containing the name of tags separated by
-blanks. For example if TAG is equal to \"a b c\", SCAN-RTAG would
-return the positions of the end and beginning of the string
-\"</c></b></a>\" in SRC between the positions START and END.  This is
-done while maintaining balanced tags.  If these conditions are not
-met, NIL is returned."
-  (let* ((tags (split " " tag))
-         (ltag (format nil "<~{~A>~^<~}" tags))
-         (rtag (format nil "</~{~A>~^</~}" (nreverse tags))))
-    (declare (string ltag rtag))
-    (do ((i start)                      ; position in src
-         (ntag 1))                      ; number of opening tags
-        ((or (>= i end) (zerop ntag))
-         (when (zerop ntag)
-           (values i (- i (length rtag)))))
-      (case-prefix (src i end)
-        (ltag
-         (incf ntag)
-         (setq i match-end))
-        (rtag
-         (decf ntag)
-         (setq i match-end))
-        (t (incf i))))))
+(defun scan-rtag (ltag rtag src start end)
+  "Return the position of the HTML closing tag RTAG in SRC between the
+positions START and END while maintaining balanced tags where LTAG is
+the corresponding opening tag.  Return NIL if these conditions are not
+met."
+  (declare (string ltag rtag))
+  (do ((i start)                        ; position in src
+       (ntag 1))                        ; number of opening tags
+      ((or (>= i end) (zerop ntag))
+       (when (zerop ntag) i))
+    (case-prefix (src i end)
+      (ltag
+       (incf ntag)
+       (setq i match-end))
+      (rtag
+       (decf ntag)
+       (setq i match-end))
+      (t (incf i)))))
 
 (defun amp->text (src dst start end)
   "Transform the HTML string SRC between START and END after an
