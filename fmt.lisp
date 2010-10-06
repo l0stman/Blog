@@ -369,17 +369,16 @@ it doesn't exist."
     (t
      (case-match (src start end)
        ("^a href=\"([^\"]+)\">"         ; link?
-        (multiple-value-bind (after before)
-            (scan-rtag "a" src match-end end)
+        (let ((pos (search "</a>" src :start2 match-end :end2 end)))
           (princ #\[ dst)
-          (html->text src dst match-end (or before end))
+          (html->text src dst match-end (or pos end))
           (princ "](" dst)
           (write-sequence src
                           dst
                           :start (aref reg-starts 0)
                           :end (aref reg-ends 0))
           (princ #\) dst)
-          (or after end)))
+          (if pos (+ pos 4) end)))
        (t
         (princ "\\<" dst)
         start)))))
