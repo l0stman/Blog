@@ -46,7 +46,7 @@ START.  MATCH-END is bound to the position after the prefix in SRC."
                    `(let ((match-end (+ ,start
                                        ,(if (stringp (car cl))
                                             (length (car cl))
-                                            `(length ,(car cl))))))
+                                            `(length (the string ,(car cl)))))))
                       (if (and (<= match-end ,end)
                                (string= ,(car cl) ,src :start2 ,start
                                         :end2 match-end))
@@ -261,25 +261,6 @@ handler function that transforms TEXT to HTML."
            (princ #\- dst)
            pos))))
 
-(defun scan-rtag (ltag rtag src start end)
-  "Return the position of the HTML closing tag RTAG in SRC between the
-positions START and END while maintaining balanced tags where LTAG is
-the corresponding opening tag.  Return NIL if these conditions are not
-met."
-  (declare (string ltag rtag))
-  (do ((i start)                        ; position in src
-       (ntag 1))                        ; number of opening tags
-      ((or (>= i end) (zerop ntag))
-       (when (zerop ntag) i))
-    (case-prefix (src i end)
-      (ltag
-       (incf ntag)
-       (setq i match-end))
-      (rtag
-       (decf ntag)
-       (setq i match-end))
-      (t (incf i)))))
-
 (defun amp->text (src dst start end)
   "Transform the HTML string SRC between START and END after an
 ampersand and write the result to DST. Return the position
@@ -299,67 +280,93 @@ immediately after the HTML entity."
         match-end)
        (t (princ "\\&" dst) start)))))
 
+(defun scan-rtag (ltag rtag src start end)
+  "Return the position of the HTML closing tag RTAG in SRC between the
+positions START and END while maintaining balanced tags where LTAG is
+the corresponding opening tag.  Return NIL if these conditions are not
+met."
+  (declare (string ltag rtag))
+  (do ((i start)                        ; position in src
+       (ntag 1))                        ; number of opening tags
+      ((or (>= i end) (zerop ntag))
+       (when (zerop ntag) i))
+    (case-prefix (src i end)
+      (ltag
+       (incf ntag)
+       (setq i match-end))
+      (rtag
+       (decf ntag)
+       (setq i match-end))
+      (t (incf i)))))
+
+(defmacro case-tag ((src start end) &body clauses)
+  `(case-prefix (,src ,start ,end)
+     ,@(mapcar #'(lambda (clause)
+                   (destructuring-bind (tnames &rest body) clause
+                     (if (eq tnames t)
+                         `(t ,@body)
+                         (let* ((tags (split " " tnames))
+                                (ltag (format nil "<~{~A>~^<~}" tags))
+                                (rtag (format nil "</~{~A>~^</~}"
+                                              (nreverse tags))))
+                           `(,(subseq ltag 1)
+                              (let* ((end-ltag (+ ,start ,(1- (length ltag))))
+                                     (end-rtag (scan-rtag ,ltag ,rtag ,src
+                                                          end-ltag ,end))
+                                     (beg-rtag (when end-rtag
+                                                 (- end-rtag ,(length rtag)))))
+                                ,@body))))))
+               clauses)))
+
 (defun lt->text (src dst start end)
   "Transform the HTML string SRC between START and END after a left
 angle bracket and write the result to DST.  Return the position
 immediately after the closing tag or the position after the bracket if
 it doesn't exist."
-  (case-prefix (src start end)
-    ("em>"
-     (multiple-value-bind (after before)
-         (scan-rtag "em" src match-end end)
-       (princ #\_ dst)
-       (html->text src dst match-end (or before end))
-       (princ #\_ dst)
-       (or after end)))
-    ("strong>"
-     (multiple-value-bind (after before)
-         (scan-rtag "strong" src match-end end)
-       (princ #\* dst)
-       (html->text src dst match-end (or before end))
-       (princ #\* dst)
-       (or after end)))
-    ("code>"
-     (multiple-value-bind (after before)
-         (scan-rtag "code" src match-end end)
-       (princ #\` dst)
-       (unesc src dst match-end (or before end))
-       (princ #\` dst)
-       (or after end)))
-    ("blockquote>"
-     (multiple-value-bind (after before)
-         (scan-rtag "blockquote" src match-end end)
-       (princ #\> dst)
-       (write-sequence
-        (regex-replace-all "\\r\\n|\\\\<br/\\\\>"
-                           (with-output-to-string (q)
-                             (html->text src q match-end (or before end)))
-                           (format nil "~A>" +eol+))
-        dst)
-       (if after
-           (progn (princ +emptyl+ dst) after)
-           end)))
-    ("pre><code>"
-     (multiple-value-bind (after before)
-         (scan-rtag "pre code" src match-end end)
-       (princ +spc+ dst)
-       (write-sequence
-        (regex-replace-all "(?<=\\r\\n)"
-                           (with-output-to-string (d)
-                             (unesc src d match-end (or before end)))
-                           +spc+)
-        dst)
-       (if after
-           (progn (princ +emptyl+ dst) after)
-           end)))
-    ("p>"
-     (multiple-value-bind (after before)
-         (scan-rtag "p" src match-end end)
-       (html->text src dst match-end (or before end))
-       (cond ((and after (< after end))
-              (princ +emptyl+ dst)
-              after)
-             (t end))))
+  (case-tag (src start end)
+    ("em"
+     (princ #\_ dst)
+     (html->text src dst end-ltag (or beg-rtag end))
+     (princ #\_ dst)
+     (or end-rtag end))
+    ("strong"
+     (princ #\* dst)
+     (html->text src dst end-ltag (or beg-rtag end))
+     (princ #\* dst)
+     (or end-rtag end))
+    ("code"
+     (princ #\` dst)
+     (unesc src dst end-ltag (or beg-rtag end))
+     (princ #\` dst)
+     (or end-rtag end))
+    ("blockquote"
+     (princ #\> dst)
+     (write-sequence
+      (regex-replace-all "\\r\\n|\\\\<br/\\\\>"
+                         (with-output-to-string (q)
+                           (html->text src q end-ltag (or beg-rtag end)))
+                         (format nil "~A>" +eol+))
+      dst)
+     (if end-rtag
+         (progn (princ +emptyl+ dst) end-rtag)
+         end))
+    ("pre code"
+     (princ +spc+ dst)
+     (write-sequence
+      (regex-replace-all "(?<=\\r\\n)"
+                         (with-output-to-string (d)
+                           (unesc src d end-ltag (or beg-rtag end)))
+                         +spc+)
+      dst)
+     (if end-rtag
+         (progn (princ +emptyl+ dst) end-rtag)
+         end))
+    ("p"
+     (html->text src dst end-ltag (or beg-rtag end))
+     (cond ((and end-rtag (< end-rtag end))
+            (princ +emptyl+ dst)
+            end-rtag)
+           (t end)))
     (t
      (case-match (src start end)
        ("^a href=\"([^\"]+)\">"         ; link?
