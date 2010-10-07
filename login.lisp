@@ -68,11 +68,11 @@
 (defun loggedp ()
   "Verify if the client is logged in and update its cookie."
   (aif (cookie-in *ck-name*)
-    (multiple-value-bind (time digest) (decode-cookie it)
-      (and time
-	   (trustedp time (sto digest))
-	   (cond ((expiredp time) (logout) nil)
-		 (t (update-cookie) t))))))
+       (multiple-value-bind (time digest) (decode-cookie it)
+         (and time
+              (trustedp time (sto digest))
+              (cond ((expiredp time) (logout) nil)
+                    (t (update-cookie) t))))))
 
 (declaim (inline salt hash))
 (defun salt () (random-octets 8))
