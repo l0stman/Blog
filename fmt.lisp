@@ -281,10 +281,10 @@ immediately after the HTML entity."
        (t (princ "\\&" dst) start)))))
 
 (defun scan-rtag (ltag rtag src start end)
-  "Return the position of the HTML closing tag RTAG in SRC between the
-positions START and END while maintaining balanced tags where LTAG is
-the corresponding opening tag.  Return NIL if these conditions are not
-met."
+  "Return the position after the HTML closing tag RTAG in SRC between
+the positions START and END while maintaining balanced tags where LTAG
+is the corresponding opening tag.  Return NIL if these conditions are
+not met."
   (declare (optimize))
   (declare (simple-string src))
   (do ((i start)                        ; position in src
