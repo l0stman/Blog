@@ -49,11 +49,13 @@
            do (princ (code-char ch) s)))))
 
 (defun decode-cookie (c)
-  "Return the values of the creation time of the cookie and its MAC."
+  "Return \(VALUES DATA MAC EXPIRATION-TIME)."
   (multiple-value-bind (match regs)
-      (scan-to-strings "^(exp=\\d+)&digest=(.+)" c)
+      (scan-to-strings "^(exp=(\\d+))&digest=(.+)" c)
     (when match
-      (values (aref regs 0) (aref regs 1)))))
+      (values (aref regs 0)
+              (aref regs 2)
+              (parse-integer (aref regs 1))))))
 
 (defvar *ck-name* "auth"
   "Name of the cookie for authentication.")
