@@ -41,18 +41,19 @@
 
 (defun encode-cookie ()
   "Return a string containing the expiration time and its MAC separated by &."
-  (let ((exp (write-to-string (+ (get-universal-time) *session-max-time*))))
+  (let ((data (format nil "exp=~D"
+                      (+ (get-universal-time) *session-max-time*))))
     (with-output-to-string (s)
-      (format s "exp=~a&digest=" exp)
-      (loop for ch across (digest exp)
-	   do (princ (code-char ch) s)))))
+      (format s "~A&digest=" data)
+      (loop for ch across (digest data)
+           do (princ (code-char ch) s)))))
 
 (defun decode-cookie (c)
   "Return the values of the creation time of the cookie and its MAC."
-  (let ((entries (split "[&=]" c :limit 4)))
-    (and (string= (first entries) "exp")
-         (string= (third entries) "digest")
-         (values (second entries) (fourth entries)))))
+  (multiple-value-bind (match regs)
+      (scan-to-strings "^(exp=\\d+)&digest=(.+)" c)
+    (when match
+      (values (aref regs 0) (aref regs 1)))))
 
 (defvar *ck-name* "auth"
   "Name of the cookie for authentication.")
