@@ -285,11 +285,13 @@ immediately after the HTML entity."
 positions START and END while maintaining balanced tags where LTAG is
 the corresponding opening tag.  Return NIL if these conditions are not
 met."
-  (declare (string ltag rtag))
+  (declare (optimize))
+  (declare (simple-string src))
   (do ((i start)                        ; position in src
        (ntag 1))                        ; number of opening tags
       ((or (>= i end) (zerop ntag))
        (when (zerop ntag) i))
+    (declare (fixnum i ntag end))
     (case-prefix (src i end)
       (ltag
        (incf ntag)
