@@ -30,7 +30,7 @@
          (dotimes (i (length digest) (zerop res))
            (setq res
                  (logior res
-                         (logxor (aref digest i) (aref digest i))))))))
+                         (logxor (aref digest i) (aref digest1 i))))))))
 
 (defvar *session-max-time* 3600
   "The time in seconds after which the cookie expires if unused.")
