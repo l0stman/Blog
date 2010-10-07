@@ -15,7 +15,7 @@
 
 (defvar *secret-key* (random-octets 32))
 
-(declaim (inline digest trustedp loggedp expiredp))
+(declaim (inline digest trustedp loggedp))
 
 (defun digest (data)
   "Compute the digest of the string data."
@@ -34,10 +34,6 @@
 
 (defvar *session-max-time* 3600
   "The time in seconds after which the cookie expires if unused.")
-
-(defun expiredp (time)
-  (aif (parse-integer time :junk-allowed t)
-    (< it (get-universal-time))))
 
 (defun encode-cookie ()
   "Return a string containing the expiration time and its MAC separated by &."
@@ -71,10 +67,11 @@
 (defun loggedp ()
   "Verify if the client is logged in and update its cookie."
   (aif (cookie-in *ck-name*)
-       (multiple-value-bind (time digest) (decode-cookie it)
-         (and time
-              (trustedp time (sto digest))
-              (cond ((expiredp time) (logout) nil)
+       (multiple-value-bind (data digest exp-time) (decode-cookie it)
+         (and data
+              (trustedp data (sto digest))
+              (cond ((< exp-time (get-universal-time))
+                     (logout) nil)
                     (t (update-cookie) t))))))
 
 (declaim (inline salt hash))
