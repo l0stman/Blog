@@ -325,66 +325,54 @@ met."
 angle bracket and write the result to DST.  Return the position
 immediately after the closing tag or the position after the bracket if
 it doesn't exist."
-  (case-tag (src start end)
-    ("em"
-     (princ #\_ dst)
-     (html->text src dst end-ltag (or beg-rtag end))
-     (princ #\_ dst)
-     (or end-rtag end))
-    ("strong"
-     (princ #\* dst)
-     (html->text src dst end-ltag (or beg-rtag end))
-     (princ #\* dst)
-     (or end-rtag end))
-    ("code"
-     (princ #\` dst)
-     (unesc src dst end-ltag (or beg-rtag end))
-     (princ #\` dst)
-     (or end-rtag end))
-    ("blockquote"
-     (princ #\> dst)
-     (write-sequence
-      (regex-replace-all "\\r\\n|\\\\<br/\\\\>"
-                         (with-output-to-string (q)
-                           (html->text src q end-ltag (or beg-rtag end)))
-                         (format nil "~A>" +eol+))
-      dst)
-     (if end-rtag
-         (progn (princ +emptyl+ dst) end-rtag)
-         end))
-    ("pre code"
-     (princ +spc+ dst)
-     (write-sequence
-      (regex-replace-all "(?<=\\r\\n)"
-                         (with-output-to-string (d)
-                           (unesc src d end-ltag (or beg-rtag end)))
-                         +spc+)
-      dst)
-     (if end-rtag
-         (progn (princ +emptyl+ dst) end-rtag)
-         end))
-    ("p"
-     (html->text src dst end-ltag (or beg-rtag end))
-     (cond ((and end-rtag (< end-rtag end))
-            (princ +emptyl+ dst)
-            end-rtag)
-           (t end)))
-    (t
-     (case-match (src start end)
-       ("^a href=\"([^\"]+)\">"         ; link?
-        (let ((pos (search "</a>" src :start2 match-end :end2 end)))
-          (princ #\[ dst)
-          (html->text src dst match-end (or pos end))
-          (princ "](" dst)
-          (write-sequence src
-                          dst
-                          :start (aref reg-starts 0)
-                          :end (aref reg-ends 0))
-          (princ #\) dst)
-          (if pos (+ pos 4) end)))
-       (t
-        (princ "\\<" dst)
-        start)))))
+  (macrolet ((html->del (ch)
+               `(progn
+                  (princ ,ch dst)
+                  (html->text src dst end-ltag (or beg-rtag end))
+                  (princ ,ch dst)
+                  (or end-rtag end)))
+             (block->text (pref eol-re)
+               (w/syms (d)
+                 `(progn
+                    (princ ,pref dst)
+                    (write-sequence
+                     (regex-replace-all ,eol-re
+                                        (with-output-to-string (,d)
+                                          (html->text src ,d end-ltag
+                                                      (or beg-rtag end)))
+                                        (format nil "~A~A" +eol+ ,pref))
+                     dst)
+                    (if end-rtag
+                        (progn (princ +emptyl+ dst) end-rtag)
+                        end)))))
+    (case-tag (src start end)
+      ("em" (html->del #\_))
+      ("strong" (html->del #\*))
+      ("code" (html->del #\`))
+      ("blockquote" (block->text #\> "\\r\\n|\\\\<br/\\\\>"))
+      ("pre code" (block->text +spc+ "\\r\\n"))
+      ("p"
+       (html->text src dst end-ltag (or beg-rtag end))
+       (cond (end-rtag
+              (princ +emptyl+ dst)
+              end-rtag)
+             (t end)))
+      (t
+       (case-match (src start end)
+         ("^a href=\"([^\"]+)\">"       ; link?
+          (let ((pos (search "</a>" src :start2 match-end :end2 end)))
+            (princ #\[ dst)
+            (html->text src dst match-end (or pos end))
+            (princ "](" dst)
+            (write-sequence src
+                            dst
+                            :start (aref reg-starts 0)
+                            :end (aref reg-ends 0))
+            (princ #\) dst)
+            (if pos (+ pos 4) end)))
+         (t
+          (princ "\\<" dst)
+          start))))))
 
 (defun html->text (src dst start end)
   "Transform the input HTML string SRC between the positions START and
