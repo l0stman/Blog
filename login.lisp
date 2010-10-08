@@ -46,8 +46,8 @@
 
 (defun decode-cookie (c)
   "Return \(VALUES DATA MAC EXPIRATION-TIME)."
-  (multiple-value-bind (match regs)
-      (scan-to-strings "^(exp=(\\d+))&digest=(.+)" c)
+  (multiple-value-bind (match regs)     ; digest could contain newlines
+      (scan-to-strings "(?s)^(exp=(\\d+))&digest=(.+)" c)
     (when match
       (values (aref regs 0)
               (aref regs 2)
