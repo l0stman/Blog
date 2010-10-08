@@ -56,12 +56,14 @@
 (defvar *ck-name* "auth"
   "Name of the cookie for authentication.")
 
-(declaim (inline update-cookie))
+(declaim (inline update-cookie revoke-cookie))
 (defun update-cookie ()
   (set-cookie *ck-name* :value (encode-cookie)))
+(defun revoke-cookie ()
+  (set-cookie *ck-name* :expires  (1- (get-universal-time))))
 
 (defhand (logout "/logout") ()
-  (set-cookie *ck-name* :expires (1- (get-universal-time)))
+  (revoke-cookie)
   (redirect (or (referer) "/blog")))
 
 (defun loggedp ()
@@ -71,7 +73,7 @@
          (and data
               (trustedp data (sto digest))
               (cond ((< exp-time (get-universal-time))
-                     (logout) nil)
+                     (revoke-cookie) nil)
                     (t (update-cookie) t))))))
 
 (declaim (inline salt hash))
