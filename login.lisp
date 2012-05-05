@@ -39,15 +39,16 @@
   "Return a string containing the expiration time and its MAC separated by &."
   (let ((data (format nil "exp=~D"
                       (+ (get-universal-time) *session-max-time*))))
-    (with-output-to-string (s)
-      (format s "~A&digest=" data)
-      (loop for ch across (digest data)
-           do (princ (code-char ch) s)))))
+    (url-encode
+     (with-output-to-string (s)
+       (format s "~A&digest=" data)
+       (loop for ch across (digest data)
+          do (princ (code-char ch) s))))))
 
 (defun decode-cookie (c)
   "Return \(VALUES DATA MAC EXPIRATION-TIME)."
   (multiple-value-bind (match regs)     ; digest could contain newlines
-      (scan-to-strings "(?s)^(exp=(\\d+))&digest=(.+)" c)
+      (scan-to-strings "(?s)^(exp=(\\d+))&digest=(.+)" (url-decode c))
     (when match
       (values (aref regs 0)
               (aref regs 2)
